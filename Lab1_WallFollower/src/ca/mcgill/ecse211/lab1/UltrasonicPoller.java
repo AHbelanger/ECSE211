@@ -11,7 +11,7 @@ import static ca.mcgill.ecse211.lab1.Resources.*;
  * one cycle through the loop is approximately 70 ms. This corresponds to a sampling rate of 1/70ms
  * or about 14 Hz.
  */
-public class UltrasonicPoller implements Runnable {
+public class UltrasonicPoller implements Runnable { // designed to be run
 
   private UltrasonicController controller;
   private float[] usData;
@@ -38,6 +38,9 @@ public class UltrasonicPoller implements Runnable {
       } catch (Exception e) {
       } // Poor man's timed sampling
     }
+  }
+  public float[] getUsData() {
+    return usData;
   }
 
 }
