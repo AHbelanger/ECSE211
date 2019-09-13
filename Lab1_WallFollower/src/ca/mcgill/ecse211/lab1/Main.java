@@ -21,6 +21,8 @@ public class Main {
   public static void main(String[] args) {
     // Set up the display on the EV3 screen and wait for a button press. 
     // The button ID (option) determines what type of control to use
+    
+    System.out.print("This is the main method");
     Printer.printMainMenu();
     int option = Button.waitForAnyPress();
 
