@@ -15,6 +15,14 @@ local.properties
 .loadpath
 .recommenders
 
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
 # MacOS .DS_Store
 .DS_Store
 
