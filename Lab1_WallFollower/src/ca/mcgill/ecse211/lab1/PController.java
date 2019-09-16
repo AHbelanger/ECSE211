@@ -6,7 +6,10 @@ public class PController extends UltrasonicController {
 
   
   public double error; // computing the error
-  int pConstant = 2;
+  int pConstant = 5;
+  int diff;
+  private static final int maxCorrection = 350;
+
 
   public PController() {
     LEFT_MOTOR.setSpeed(MOTOR_HIGH); // Start robot moving forward
@@ -35,21 +38,34 @@ public class PController extends UltrasonicController {
     }
     else if (error < 0) { // if current distance is too far from the wall
       // rotate left wheel slower
-      LEFT_MOTOR.setSpeed((int) (MOTOR_HIGH-error*pConstant)); // Start robot moving forward //INITIALLY AT 4
-      RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
+      diff = calcCorrection(error);
+      LEFT_MOTOR.setSpeed(MOTOR_HIGH-diff*2); // Start robot moving forward //INITIALLY AT 4
+      RIGHT_MOTOR.setSpeed(MOTOR_HIGH + diff*5);
       LEFT_MOTOR.forward();
       RIGHT_MOTOR.forward();
     }
     else  { // if current distance is too close to the wall
       // if it deviates too far, rotate the left wheels faster/ slow down the right wheels
-      LEFT_MOTOR.setSpeed(MOTOR_HIGH);
-      RIGHT_MOTOR.setSpeed((int) (MOTOR_HIGH-error*pConstant));
+      diff = calcCorrection(error);
+      LEFT_MOTOR.setSpeed(MOTOR_HIGH + diff*5); // Start robot moving forward //INITIALLY AT 4
+      RIGHT_MOTOR.setSpeed(MOTOR_HIGH - diff*2);
       LEFT_MOTOR.forward();
       RIGHT_MOTOR.forward();
     }
   }
+    
+    private int calcCorrection(double errorVal) {
+      errorVal = Math.abs(errorVal);
 
+      int speedCorrection = (int) (pConstant * errorVal);
 
+      if (speedCorrection >= maxCorrection)
+          speedCorrection = 70;
+
+      return speedCorrection;
+
+  }
+    
   @Override
   public int readUSDistance() {
     return this.distance;
