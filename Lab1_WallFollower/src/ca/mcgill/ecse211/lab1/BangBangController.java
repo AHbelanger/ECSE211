@@ -5,8 +5,6 @@ import static ca.mcgill.ecse211.lab1.Resources.*;
 public class BangBangController extends UltrasonicController {
   
   public static final int DELTASPEED = 50; // BANG BANG constant
-  double UpperBound = 12;
-  double LowerBound = 5;
   public double error; // computing the error
 
   public BangBangController() {

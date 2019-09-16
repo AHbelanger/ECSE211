@@ -30,7 +30,7 @@ public class PController extends UltrasonicController {
     }
     if(Math.abs(errorCM) <= BAND_WIDTH) //straight (in dead band)
     {
-      LEFT_MOTOR.setSpeed(MOTOR_SPEED);
+        LEFT_MOTOR.setSpeed(MOTOR_SPEED);
         RIGHT_MOTOR.setSpeed(MOTOR_SPEED);
         LEFT_MOTOR.forward();
         RIGHT_MOTOR.forward();
