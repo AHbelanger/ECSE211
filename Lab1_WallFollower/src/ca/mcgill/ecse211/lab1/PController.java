@@ -4,51 +4,49 @@ import static ca.mcgill.ecse211.lab1.Resources.*;
 
 public class PController extends UltrasonicController {
 
-  private static final int MOTOR_SPEED = 200;
-  private int lasterror;
-  private final int filterDistance = 50;    //difference between previous and current errors to signal a false positive
-
+  
+  public double error; // computing the error
+  int pConstant = 5;
 
   public PController() {
-    LEFT_MOTOR.setSpeed(MOTOR_SPEED); // Initialize motor rolling forward
-    RIGHT_MOTOR.setSpeed(MOTOR_SPEED);
+    LEFT_MOTOR.setSpeed(MOTOR_HIGH); // Start robot moving forward
+    RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
     LEFT_MOTOR.forward();
     RIGHT_MOTOR.forward();
+
   }
 
   @Override
   public void processUSData(int distance) {
     filter(distance);
-
-    // TODO: process a movement based on the us distance passed in (P style)
-    int errorCM = this.distance - BAND_CENTER;  //offset between current position and ideal distance from wall (in cm)
-    //check if the reported error suddenly changed - ignore value if so (false positive)
-    if(errorCM - lasterror > this.filterDistance)
-    {
-        lasterror = errorCM;
-        return;
+    error = BAND_CENTER - distance; 
+    /*error is the distance we want minus the distance we have 
+     * the error must be within 
+     *  
+     *  */
+    
+    // TODO: process a movement based on the us distance passed in (BANG-BANG style)
+ 
+    if (Math.abs(error) <= BAND_WIDTH){ // if it is within the range, keep going forward
+      LEFT_MOTOR.setSpeed(MOTOR_HIGH); // Start robot moving forward
+      RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
+      LEFT_MOTOR.forward();
+      RIGHT_MOTOR.forward();
     }
-    if(Math.abs(errorCM) <= BAND_WIDTH) //straight (in dead band)
-    {
-        LEFT_MOTOR.setSpeed(MOTOR_SPEED);
-        RIGHT_MOTOR.setSpeed(MOTOR_SPEED);
-        LEFT_MOTOR.forward();
-        RIGHT_MOTOR.forward();
+    else if (error < 0) { // if current distance is too far from the wall
+      // rotate left wheel slower
+      LEFT_MOTOR.setSpeed(MOTOR_HIGH); // Start robot moving forward //INITIALLY AT 4
+      RIGHT_MOTOR.setSpeed((int) (MOTOR_HIGH+error*pConstant));
+      LEFT_MOTOR.forward();
+      RIGHT_MOTOR.forward();
     }
-    else if(errorCM < 0)                                //too close to wall - swerve right
-    {
-        LEFT_MOTOR.setSpeed(MOTOR_SPEED + (BAND_CENTER - Math.abs(this.distance)) * 11.0f); //constant higher because the distance closer to the wall is constrained (0-bandcenter)
-        RIGHT_MOTOR.setSpeed(MOTOR_SPEED);
-        LEFT_MOTOR.forward();
-        RIGHT_MOTOR.forward();
+    else  { // if current distance is too close to the wall
+      // if it deviates too far, rotate the left wheels faster/ slow down the right wheels
+      LEFT_MOTOR.setSpeed((int) (MOTOR_HIGH+error*pConstant));
+      RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
+      LEFT_MOTOR.forward();
+      RIGHT_MOTOR.forward();
     }
-    else {                                  //too far from wall - swerve left
-        LEFT_MOTOR.setSpeed(MOTOR_SPEED);    
-        RIGHT_MOTOR.setSpeed(MOTOR_SPEED + this.distance * 1.5f);    //smaller constant as distance can get much higher (bandcenter-255)
-        LEFT_MOTOR.forward();
-        RIGHT_MOTOR.forward();
-    }
-    lasterror = errorCM; //record last error
   }
 
 
