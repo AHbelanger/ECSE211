@@ -6,7 +6,7 @@ public class PController extends UltrasonicController {
 
   
   public double error; // computing the error
-  int pConstant = 5;
+  int pConstant = 2;
 
   public PController() {
     LEFT_MOTOR.setSpeed(MOTOR_HIGH); // Start robot moving forward
@@ -35,15 +35,15 @@ public class PController extends UltrasonicController {
     }
     else if (error < 0) { // if current distance is too far from the wall
       // rotate left wheel slower
-      LEFT_MOTOR.setSpeed(MOTOR_HIGH); // Start robot moving forward //INITIALLY AT 4
-      RIGHT_MOTOR.setSpeed((int) (MOTOR_HIGH+error*pConstant));
+      LEFT_MOTOR.setSpeed((int) (MOTOR_HIGH-error*pConstant)); // Start robot moving forward //INITIALLY AT 4
+      RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
       LEFT_MOTOR.forward();
       RIGHT_MOTOR.forward();
     }
     else  { // if current distance is too close to the wall
       // if it deviates too far, rotate the left wheels faster/ slow down the right wheels
-      LEFT_MOTOR.setSpeed((int) (MOTOR_HIGH+error*pConstant));
-      RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
+      LEFT_MOTOR.setSpeed(MOTOR_HIGH);
+      RIGHT_MOTOR.setSpeed((int) (MOTOR_HIGH-error*pConstant));
       LEFT_MOTOR.forward();
       RIGHT_MOTOR.forward();
     }

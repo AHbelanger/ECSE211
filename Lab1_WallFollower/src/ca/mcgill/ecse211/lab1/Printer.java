@@ -28,7 +28,7 @@ public class Printer implements Runnable {
       
       // print last US reading
       TEXT_LCD.drawString("US Distance: " + controller.readUSDistance(), 0, 2);
-      TEXT_LCD.drawString("Error: " + ((BangBangController) controller).error, 0, 3);
+      //TEXT_LCD.drawString("Error: " + ((BangBangController) controller).error, 0, 3);
       try {
         Thread.sleep(200); // sleep for 200 mS
       } catch (Exception e) {
