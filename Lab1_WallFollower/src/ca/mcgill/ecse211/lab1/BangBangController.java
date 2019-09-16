@@ -5,6 +5,8 @@ import static ca.mcgill.ecse211.lab1.Resources.*;
 public class BangBangController extends UltrasonicController {
   
   public static final int DELTASPEED = 50; // BANG BANG constant
+  double UpperBound = 12;
+  double LowerBound = 5;
   public double error; // computing the error
 
   public BangBangController() {
@@ -34,7 +36,7 @@ public class BangBangController extends UltrasonicController {
     }
     else if (error < 0) { // if current distance is too far from the wall
       // rotate left wheel slower
-      LEFT_MOTOR.setSpeed(MOTOR_HIGH-DELTASPEED*5); // Start robot moving forward //INITIALLY AT 4
+      LEFT_MOTOR.setSpeed(MOTOR_HIGH-DELTASPEED*4); // Start robot moving forward
       RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
       LEFT_MOTOR.forward();
       RIGHT_MOTOR.forward();
