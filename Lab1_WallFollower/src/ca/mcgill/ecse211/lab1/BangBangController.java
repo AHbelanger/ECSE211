@@ -5,8 +5,6 @@ import static ca.mcgill.ecse211.lab1.Resources.*;
 public class BangBangController extends UltrasonicController {
   
   public static final int DELTASPEED = 50; // BANG BANG constant
-  double UpperBound = 12;
-  double LowerBound = 5;
   public double error; // computing the error
 
   public BangBangController() {
@@ -20,7 +18,7 @@ public class BangBangController extends UltrasonicController {
   @Override
   public void processUSData(int distance) {
     filter(distance);
-    error = BAND_CENTER - distance; 
+    error = BAND_CENTER_BANGBANG - distance; 
     /*error is the distance we want minus the distance we have 
      * the error must be within 
      *  
@@ -28,7 +26,7 @@ public class BangBangController extends UltrasonicController {
     
     // TODO: process a movement based on the us distance passed in (BANG-BANG style)
  
-    if (Math.abs(error) <= BAND_WIDTH){ // if it is within the range, keep going forward
+    if (Math.abs(error) <= BAND_WIDTH_BANGBANG) { // if it is within the range, keep going forward
       LEFT_MOTOR.setSpeed(MOTOR_HIGH); // Start robot moving forward
       RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
       LEFT_MOTOR.forward();
@@ -36,7 +34,7 @@ public class BangBangController extends UltrasonicController {
     }
     else if (error < 0) { // if current distance is too far from the wall
       // rotate left wheel slower
-      LEFT_MOTOR.setSpeed(MOTOR_HIGH-DELTASPEED*4); // Start robot moving forward
+      LEFT_MOTOR.setSpeed(MOTOR_HIGH-DELTASPEED*4); // Start robot moving forward was at 4 before
       RIGHT_MOTOR.setSpeed(MOTOR_HIGH);
       LEFT_MOTOR.forward();
       RIGHT_MOTOR.forward();
