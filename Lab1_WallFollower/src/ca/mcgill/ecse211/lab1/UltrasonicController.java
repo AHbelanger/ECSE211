@@ -8,6 +8,7 @@ import static ca.mcgill.ecse211.lab1.Resources.*;
 public abstract class UltrasonicController {
 
   int distance;
+  int error;
   
   int filterControl;
   
