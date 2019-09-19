@@ -10,17 +10,12 @@ import static ca.mcgill.ecse211.lab2.Resources.*;
 /**
  * The odometer class keeps track of the robot's (x, y, theta) position.
  * 
- * @author Rodrigo Silva
- * @author Dirk Dubois
- * @author Derek Yu
- * @author Karim El-Baba
- * @author Michael Smith
- * @author Younes Boubekeur
+ *
  */
 
 public class Odometer implements Runnable {
   
-  public static final double WB = 16.0;   //wheelbase
+  public static final double WB = 16.7;   //wheelbase
   public static final double WR = WHEEL_RAD;    //wheel radius
   
   // Motor-related variables
@@ -102,6 +97,8 @@ public class Odometer implements Runnable {
 
     while (true) {
       updateStart = System.currentTimeMillis();
+      
+      
       double distL , distR , deltaD , deltaT,  dX , dY ;
 
       nowTachoL = leftMotor.getTachoCount();
@@ -110,10 +107,12 @@ public class Odometer implements Runnable {
       // TODO Calculate new robot position based on tachometer counts
       distL = 3.14159*WR*(nowTachoL-lastTachoL)/180;   // compute wheel
       distR = 3.14159*WR*(nowTachoR-lastTachoR)/180;   // displacements
-      lastTachoL=nowTachoL;  // save tacho counts for next iteration 
-      lastTachoR=nowTachoR;
-      deltaD = 0.5*(distL+distR);       // compute vehicle displacement 
-      deltaT = (distL-distR)/WB;        // compute change in heading
+      
+      lastTachoL = nowTachoL;  // save tacho counts for next iteration 
+      lastTachoR = nowTachoR;
+      deltaD = 0.5 * (distL + distR);       // compute vehicle displacement 
+      deltaT = (distL - distR) / WB;        // compute change in heading
+      
       theta += deltaT;            // update heading 
       dX = deltaD * Math.sin(theta);    // compute X component of displacement 
       dY = deltaD * Math.cos(theta);  // compute Y component of displacement 
