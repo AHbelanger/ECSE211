@@ -27,7 +27,7 @@ public class Main {
     } else {
       buttonChoice = chooseCorrectionOrNot();
       if (buttonChoice == Button.ID_RIGHT) {
-        new Thread(new OdometryCorrection(odometer)).start(); // TODO implement OdometryCorrection
+        new Thread(new OdometryCorrection()).start(); // TODO implement OdometryCorrection
       }
       SquareDriver.drive();
     }

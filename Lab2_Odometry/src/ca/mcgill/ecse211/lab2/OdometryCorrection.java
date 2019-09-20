@@ -21,10 +21,10 @@ public class OdometryCorrection implements Runnable {
   private SampleProvider colorSensorValue = colorSamplerSensor.getMode("Red"); // get sample provider
   private float[] colorSensorData = new float[colorSamplerSensor.sampleSize()]; // create data buffer
 
-  private float oldValue = 0;
-  private int counterX; // counts how many lines in x
-  private int counterY; // counts how many lines in y
-  private double theta; // angle
+  //  private float oldValue = 0;
+  //  private int counterX; // counts how many lines in x
+  //  private int counterY; // counts how many lines in y
+  //  private double theta; // angle
 
   private static int counter = 0; //counts how many times the light sensor has seen a line
   private static int SQUARE_SIDES = 4;
@@ -80,28 +80,17 @@ public class OdometryCorrection implements Runnable {
           //We adjust X
           odometer.setX(increments.get(counter));
         }
-
         counter++;
-
       }
 
+      // TODO Update odometer with new calculated (and more accurate) values, eg:
+      //odometer.setXYT(0.3, 19.23, 5.0);
 
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      // this ensures the odometry correction occurs only once every period
+      correctionEnd = System.currentTimeMillis();
+      if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
+        Main.sleepFor(CORRECTION_PERIOD - (correctionEnd - correctionStart));
       }
-    }
-
-
-    // TODO Update odometer with new calculated (and more accurate) values, eg:
-    //odometer.setXYT(0.3, 19.23, 5.0);
-
-    // this ensures the odometry correction occurs only once every period
-    correctionEnd = System.currentTimeMillis();
-    if (correctionEnd - correctionStart < CORRECTION_PERIOD) {
-      Main.sleepFor(CORRECTION_PERIOD - (correctionEnd - correctionStart));
     }
   }
 }
