@@ -112,16 +112,17 @@ public class Odometer implements Runnable {
       lastTachoR = nowTachoR;
       
       deltaD = 0.5 * (distL + distR);       // compute vehicle displacement 
-      deltaT = (distL - distR) / WB;        // compute change in heading
-      theta += deltaT;            // update heading 
+      deltaT = Math.toDegrees(((distL - distR) / WB));        // compute change in heading
+      //theta += deltaT;            // update heading 
       
-      dX = deltaD * Math.sin(theta);    // compute X component of displacement 
-      dY = deltaD * Math.cos(theta);  // compute Y component of displacement 
-     
+      odo.update(0, 0, deltaT);
+      
+      dX = deltaD * Math.sin(Math.toRadians(odo.getXYT()[2]));    // compute X component of displacement 
+      dY = deltaD * Math.cos(Math.toRadians(odo.getXYT()[2]));  // compute Y component of displacement 
 
       // TODO Update odometer values with new calculated values, eg
       //odo.update(dx, dy, dtheta);
-      odo.update(dX, dY, 180*deltaT/Math.PI);
+      odo.update(dX, dY, 0);
 
       // this ensures that the odometer only runs once every period
       updateEnd = System.currentTimeMillis();
