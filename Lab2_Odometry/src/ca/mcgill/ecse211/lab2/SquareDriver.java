@@ -39,8 +39,8 @@ public class SquareDriver {
           rightMotor.setSpeed(ROTATE_SPEED);
 
           //change the values if angles are not good
-          leftMotor.rotate(convertAngle(170.0), true);
-          rightMotor.rotate(-convertAngle(170.0), false);
+          leftMotor.rotate(convertAngle(95.0), true);
+          rightMotor.rotate(-convertAngle(95.0), false);
         }
       }
     }).start();

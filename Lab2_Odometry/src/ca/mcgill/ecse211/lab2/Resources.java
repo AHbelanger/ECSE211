@@ -22,7 +22,7 @@ public class Resources {
   /**
    * The robot width in centimeters.
    */
-  public static final double TRACK = 15;
+  public static final double TRACK = 10.1;
   
   /**
    * The speed at which the robot moves forward in degrees per second.
@@ -53,13 +53,13 @@ public class Resources {
    * The left motor.
    */
   public static final EV3LargeRegulatedMotor leftMotor =
-      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
   /**
    * The right motor.
    */
   public static final EV3LargeRegulatedMotor rightMotor =
-      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
   
   /**
    * The color sensor.
