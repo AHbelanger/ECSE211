@@ -15,14 +15,14 @@ import static ca.mcgill.ecse211.lab2.Resources.*;
 
 public class Odometer implements Runnable {
 
-  public static final double WB = 16.7;   //wheelbase
+  public static final double WB = TRACK;   //wheelbase
   public static final double WR = WHEEL_RAD;    //wheel radius
 
   // Motor-related variables
   public static int lastTachoL;   //Tacho L at last sample
   public static int lastTachoR;   //Tacho R at last sample
-  public static int nowTachoL;    //Current Tacho L
-  public static int nowTachoR;    //Current Tacho R
+  public static int nowTachoL = 0;    //Current Tacho L
+  public static int nowTachoR = 0;    //Current Tacho R
 
   /**
    * The x-axis position in cm.
@@ -105,23 +105,23 @@ public class Odometer implements Runnable {
       nowTachoR = rightMotor.getTachoCount();
 
       // TODO Calculate new robot position based on tachometer counts
-      distL = 3.14159*WR*(nowTachoL-lastTachoL)/180;   // compute wheel
-      distR = 3.14159*WR*(nowTachoR-lastTachoR)/180;   // displacements
+      distL = Math.PI*WR*(nowTachoL-lastTachoL)/180;   // compute wheel
+      distR = Math.PI*WR*(nowTachoR-lastTachoR)/180;   // displacements
 
       lastTachoL = nowTachoL;  // save tacho counts for next iteration 
       lastTachoR = nowTachoR;
+      
       deltaD = 0.5 * (distL + distR);       // compute vehicle displacement 
       deltaT = (distL - distR) / WB;        // compute change in heading
-
       theta += deltaT;            // update heading 
+      
       dX = deltaD * Math.sin(theta);    // compute X component of displacement 
       dY = deltaD * Math.cos(theta);  // compute Y component of displacement 
-      x = x + dX;            // update estimates of X and Y position 
-      y = y + dY;
+     
 
       // TODO Update odometer values with new calculated values, eg
       //odo.update(dx, dy, dtheta);
-      odo.update(dX, dY, theta);
+      odo.update(dX, dY, 180*deltaT/Math.PI);
 
       // this ensures that the odometer only runs once every period
       updateEnd = System.currentTimeMillis();

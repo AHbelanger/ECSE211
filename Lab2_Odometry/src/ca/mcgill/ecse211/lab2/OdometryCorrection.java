@@ -6,30 +6,25 @@ import lejos.hardware.ev3.LocalEV3;
 //import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
-import lejos.hardware.sensor.SensorModes;
-import lejos.robotics.SampleProvider;
 
 /**
  * the odometryCorrection class is a thread
  * 
- * @author Sabrina
+ * 
  *
  */
 public class OdometryCorrection implements Runnable {
 
   private static final long CORRECTION_PERIOD = 10; // time between corrections
   private Odometer odometer; 
-
-  // creating the light sensor
-  private static final Port colorSampler = LocalEV3.get().getPort("S1"); // get the port for the light sensor
-  private SensorModes colorSamplerSensor = new EV3ColorSensor(colorSampler); // get instance of sensor
-  private SampleProvider colorSensorValue = colorSamplerSensor.getMode("Red"); // get sample provider
-  private float[] colorSensorData = new float[colorSensorValue.sampleSize()]; // create data buffer
-
-    private float oldValue = 0;
-    private int counterX; // counts how many lines in x
-    private int counterY; // counts how many lines in y
-    private double theta; // angle
+ 
+  private double[] currentPosition;
+  private int yCount, xCount, xInc, yInc;
+  private double newX, newY;
+  private int lastColor = 2;
+  private int currentColor;
+ 
+  
 
 
   /**
@@ -51,54 +46,45 @@ public class OdometryCorrection implements Runnable {
     while (true) {
       correctionStart = System.currentTimeMillis();
       
-      //fetching the values from the color sensor
-      colorSensorValue.fetchSample(colorSensorData, 0);
-      
-      //getting the value returned from the sensor, and multiply it by 1000 to scale
-      float value = colorSensorData[0]*1000;
-      
-      //computing the derivative at each point
-      float diff = value - oldValue;
-      
-      //storing the current value, to be able to get the derivative on the next iteration
-      oldValue = value;
-      
-      //if the derivative value at a given point is less than -50, this means that a black line is detected
-      if(diff < -50) {
-          
-          //robot beeps
-          Sound.beep();
-          
-          //get the status of the robot by the counter used in squareDriver, this counter keeps track of the orientation of the robot
-          //int status = SquareDriver.getSquareCount();
-          
-          theta = odometer.getTheta() * 180 / Math.PI;
-          /*
-           * The Y and X counter keeps track of how many horizontal and vertical black lines the robot detected respectively.
-           * This counter is used to computer the Y and X values respect to the origin (first intersection).
-           * theta tells us if the robot is moving forward horizontally or vertically.
-           */
-          
-          if( (theta <= 360 && theta >= 315) || (theta >=0 && theta <= 45)){
-              odometer.setY(counterY * TILE_SIZE);
-              counterY++;
-          }else if(theta > 45 && theta <= 135){
-              odometer.setX(counterX * TILE_SIZE);
-              counterX++;
-          }else if(theta > 135 && theta <= 225){
-              counterY--;
-              odometer.setY(counterY * TILE_SIZE);
-          }else if(theta > 225 && theta < 315){
-              counterX--;
-              odometer.setX(counterX * TILE_SIZE);
-          }
-          
-          try {
-              Thread.sleep(500);
-          } catch (InterruptedException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-          }
+      //black line detection
+      currentColor = colorSensor.getColorID();
+      if (currentColor - lastColor > 5) {
+        
+        currentPosition = odometer.getXYT();
+        Sound.beep();
+        
+        //Increment value
+        yInc = Math.round((float) Math.cos(Math.toRadians(currentPosition[2])));
+        xInc = Math.round((float) Math.cos(Math.toRadians(currentPosition[2])));
+
+        yCount += yInc;
+        xCount += xInc;
+        
+        
+        //Are we crossing tile boundary from the upper or lower boundary?
+        if (xInc < 0) {
+          newX = xCount * TILE_SIZE;
+        }
+        else if (xInc > 0) {
+          newX = (xCount - 1) * TILE_SIZE;
+        }
+        else {
+          newX = currentPosition[0];
+        }
+        
+        if (yInc < 0) {
+          newY = yCount * TILE_SIZE;
+        }
+        else if (yInc > 0) {
+          newY = (yCount - 1) * TILE_SIZE;
+        }
+        else {
+          newY = currentPosition[1];
+        }
+    
+        odometer.setXYT(newX, newY, currentPosition[2]);
+
+        
       }
 
       // this ensures the odometry correction occurs only once every period
@@ -107,7 +93,7 @@ public class OdometryCorrection implements Runnable {
         Main.sleepFor(CORRECTION_PERIOD - (correctionEnd - correctionStart));
       }
     }
+    
+    
   }
 }
-
-
