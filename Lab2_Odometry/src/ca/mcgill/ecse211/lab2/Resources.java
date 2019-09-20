@@ -64,7 +64,7 @@ public class Resources {
   /**
    * The color sensor.
    */
-  public static final EV3ColorSensor colorSensor = new EV3ColorSensor(SensorPort.S1);
+ // public static final EV3ColorSensor colorSensor = new EV3ColorSensor(SensorPort.S1);
 
   /**
    * The LCD.

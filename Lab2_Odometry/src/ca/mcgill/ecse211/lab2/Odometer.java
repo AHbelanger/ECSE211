@@ -9,36 +9,36 @@ import static ca.mcgill.ecse211.lab2.Resources.*;
 
 /**
  * The odometer class keeps track of the robot's (x, y, theta) position.
- * 
+ * it implements runnable
  *
  */
 
 public class Odometer implements Runnable {
-  
+
   public static final double WB = 16.7;   //wheelbase
   public static final double WR = WHEEL_RAD;    //wheel radius
-  
+
   // Motor-related variables
   public static int lastTachoL;   //Tacho L at last sample
   public static int lastTachoR;   //Tacho R at last sample
   public static int nowTachoL;    //Current Tacho L
   public static int nowTachoR;    //Current Tacho R
-  
+
   /**
    * The x-axis position in cm.
    */
   private volatile double x;
-  
+
   /**
    * The y-axis position in cm.
    */
   private volatile double y; // y-axis position
-  
+
   /**
    * The orientation in degrees.
    */
   private volatile double theta; // Head angle
-  
+
   /**
    * The (x, y, theta) position as an array
    */
@@ -49,7 +49,7 @@ public class Odometer implements Runnable {
    * Fair lock for concurrent writing
    */
   private static Lock lock = new ReentrantLock(true);
-  
+
   /**
    * Indicates if a thread is trying to reset any position parameters
    */
@@ -67,7 +67,7 @@ public class Odometer implements Runnable {
    */
   private static final long ODOMETER_PERIOD = 25;
 
-  
+
   /**
    * This is the default constructor of this class. It initiates all motors and variables once.It
    * cannot be accessed externally.
@@ -85,7 +85,7 @@ public class Odometer implements Runnable {
     if (odo == null) {
       odo = new Odometer();
     }
-    
+
     return odo;
   }
 
@@ -97,8 +97,8 @@ public class Odometer implements Runnable {
 
     while (true) {
       updateStart = System.currentTimeMillis();
-      
-      
+
+
       double distL , distR , deltaD , deltaT,  dX , dY ;
 
       nowTachoL = leftMotor.getTachoCount();
@@ -107,18 +107,18 @@ public class Odometer implements Runnable {
       // TODO Calculate new robot position based on tachometer counts
       distL = 3.14159*WR*(nowTachoL-lastTachoL)/180;   // compute wheel
       distR = 3.14159*WR*(nowTachoR-lastTachoR)/180;   // displacements
-      
+
       lastTachoL = nowTachoL;  // save tacho counts for next iteration 
       lastTachoR = nowTachoR;
       deltaD = 0.5 * (distL + distR);       // compute vehicle displacement 
       deltaT = (distL - distR) / WB;        // compute change in heading
-      
+
       theta += deltaT;            // update heading 
       dX = deltaD * Math.sin(theta);    // compute X component of displacement 
       dY = deltaD * Math.cos(theta);  // compute Y component of displacement 
       x = x + dX;            // update estimates of X and Y position 
       y = y + dY;
-      
+
       // TODO Update odometer values with new calculated values, eg
       //odo.update(dx, dy, dtheta);
       odo.update(dX, dY, theta);
@@ -134,9 +134,9 @@ public class Odometer implements Runnable {
       }
     }
   }
-  
+
   // IT IS NOT NECESSARY TO MODIFY ANYTHING BELOW THIS LINE
-  
+
   /**
    * Returns the Odometer data.
    * <p>
@@ -243,16 +243,16 @@ public class Odometer implements Runnable {
       lock.unlock();
     }
   }
-  
+
   public double getTheta() {
     double result;
 
     synchronized (lock) {
-        result = theta;
+      result = theta;
     }
 
     return result;
-}
+  }
 
   /**
    * Overwrites theta. Use for odometry correction.

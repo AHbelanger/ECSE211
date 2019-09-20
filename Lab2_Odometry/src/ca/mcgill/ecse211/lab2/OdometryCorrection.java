@@ -1,7 +1,6 @@
 package ca.mcgill.ecse211.lab2;
 
 import static ca.mcgill.ecse211.lab2.Resources.*;
-import java.util.ArrayList;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 //import lejos.hardware.lcd.TextLCD;
@@ -10,6 +9,12 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
+/**
+ * the odometryCorrection class is a thread
+ * 
+ * @author Sabrina
+ *
+ */
 public class OdometryCorrection implements Runnable {
 
   private static final long CORRECTION_PERIOD = 10; // time between corrections
@@ -19,7 +24,7 @@ public class OdometryCorrection implements Runnable {
   private static final Port colorSampler = LocalEV3.get().getPort("S1"); // get the port for the light sensor
   private SensorModes colorSamplerSensor = new EV3ColorSensor(colorSampler); // get instance of sensor
   private SampleProvider colorSensorValue = colorSamplerSensor.getMode("Red"); // get sample provider
-  private float[] colorSensorData = new float[colorSamplerSensor.sampleSize()]; // create data buffer
+  private float[] colorSensorData = new float[colorSensorValue.sampleSize()]; // create data buffer
 
     private float oldValue = 0;
     private int counterX; // counts how many lines in x
@@ -43,9 +48,7 @@ public class OdometryCorrection implements Runnable {
   public void run() {
     long correctionStart, correctionEnd;  
 
-    // TODO Trigger correction (When do I have information to correct?)
     while (true) {
-      correctionStart = System.currentTimeMillis();
       correctionStart = System.currentTimeMillis();
       
       //fetching the values from the color sensor
