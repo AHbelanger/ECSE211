@@ -243,6 +243,16 @@ public class Odometer implements Runnable {
       lock.unlock();
     }
   }
+  
+  public double getTheta() {
+    double result;
+
+    synchronized (lock) {
+        result = theta;
+    }
+
+    return result;
+}
 
   /**
    * Overwrites theta. Use for odometry correction.
