@@ -1,90 +1,85 @@
 package ca.mcgill.ecse211.lab2;
 
+
 import static ca.mcgill.ecse211.lab2.Resources.*;
 import lejos.hardware.Sound;
-import lejos.hardware.ev3.LocalEV3;
-//import lejos.hardware.lcd.TextLCD;
-import lejos.hardware.port.Port;
-import lejos.hardware.sensor.EV3ColorSensor;
+//import lejos.hardware.sensor.SensorModes;
+//import lejos.robotics.SampleProvider;
 
 /**
- * the odometryCorrection class is a thread
- * 
- * 
- *
+ * This class specifies the algorithm for correction the odometry mechanism on
+ * the EV3 robot. 
  */
 public class OdometryCorrection implements Runnable {
+  //sets correction frequency, controlling each correction loop at 10ms
+  private static final long CORRECTION_PERIOD = 10;
+  private static final double THRESHOLD = 1.0;
 
-  private static final long CORRECTION_PERIOD = 10; // time between corrections
-  private Odometer odometer; 
- 
-  private double[] currentPosition;
-  private int yCount, xCount, xInc, yInc;
-  private double newX, newY;
-  private int lastColor = 2;
-  private int currentColor;
- 
-  
+  private double[] position;
 
 
-  /**
-   *  constructor for the odometer
-   *  ensures that the thread runs safely
-   */
-  public OdometryCorrection() {
-    this.odometer = Odometer.getOdometer();
-  }
-
-  /**
-   * where the run method will execute
-   * needs this to run since it is in a thread
-   * when a line is detected, the robot will adjust the position
+  /*
+   * Here is where the odometer correction code should be run.
    */
   public void run() {
-    long correctionStart, correctionEnd;  
+    long correctionStart, correctionEnd;
 
-    while (true) {
-      correctionStart = System.currentTimeMillis();
+
+
+    // keeps track of how many lines detected on x and y axis
+    int xCount = -1, yCount = -1;
+
+    double newX, newY;
+    while (true) { // while it's detecting lines
       
-      //black line detection
-      currentColor = colorSensor.getColorID();
-      if (currentColor - lastColor > 5) {
-        
-        currentPosition = odometer.getXYT();
+      correctionStart = System.currentTimeMillis();
+
+      myColorSample.fetchSample(sampleColor, 0);
+
+      //current position
+      position = odometer.getXYT();
+      double theta = position[2] % 360;
+
+      //to plot the data points
+      //      numSamples++;
+      //      System.out.println(numSamples + "," + sampleColor[0]*1000);
+
+      //when the sensor detects a line
+      if((sampleColor[0] * 1000) < 175 && (sampleColor[0] * 1000) > 100) //change to differential calculation instead of abs value
+      {
         Sound.beep();
-        
-        //Increment value
-        yInc = Math.round((float) Math.cos(Math.toRadians(currentPosition[2])));
-        xInc = Math.round((float) Math.cos(Math.toRadians(currentPosition[2])));
-
-        yCount += yInc;
-        xCount += xInc;
-        
-        
-        //Are we crossing tile boundary from the upper or lower boundary?
-        if (xInc < 0) {
-          newX = xCount * TILE_SIZE;
+        if(theta > (0 - THRESHOLD) * Math.PI / 180.0 && theta < (0 + THRESHOLD) * Math.PI / 180.0) //angle is 0: up
+        {
+          yCount++;
+          Sound.beep();
+          newY = yCount * TILE_SIZE;// / Math.cos(theta);
+          odometer.setY(newY);
+          odometer.setTheta(0);
         }
-        else if (xInc > 0) {
-          newX = (xCount - 1) * TILE_SIZE;
+        else if(theta > (90 - THRESHOLD) * Math.PI / 180.0 && theta < (90 + THRESHOLD) * Math.PI / 180.0) //angle is 90: right
+        {
+          xCount++;
+          newX = xCount * TILE_SIZE;// / Math.cos(theta - 90);
+          Sound.beep();
+          odometer.setX(newX);
+          odometer.setTheta((90) * Math.PI / 180.0);
         }
-        else {
-          newX = currentPosition[0];
+        else if(theta > (180 - THRESHOLD) * Math.PI / 180.0 && theta < (180 + THRESHOLD) * Math.PI / 180.0) //angle is 180: down
+        {
+          newY = yCount * TILE_SIZE; // / Math.cos(theta - 180);
+          Sound.beep();
+          odometer.setY(newY);
+          odometer.setTheta((180) * Math.PI / 180.0);
+          yCount--;
         }
-        
-        if (yInc < 0) {
-          newY = yCount * TILE_SIZE;
-        }
-        else if (yInc > 0) {
-          newY = (yCount - 1) * TILE_SIZE;
-        }
-        else {
-          newY = currentPosition[1];
-        }
-    
-        odometer.setXYT(newX, newY, currentPosition[2]);
-
-        
+        else if(theta > (270 - THRESHOLD) * Math.PI / 180.0 && theta < (270 + THRESHOLD) * Math.PI / 180.0) //angle is 270: left
+        {
+          newX = xCount * TILE_SIZE; // / Math.cos(theta - 270);
+          Sound.beep();
+          odometer.setX(newX);
+          odometer.setTheta((270) * Math.PI / 180.0);
+          xCount--;
+        } 
       }
 
       // this ensures the odometry correction occurs only once every period
@@ -93,7 +88,8 @@ public class OdometryCorrection implements Runnable {
         Main.sleepFor(CORRECTION_PERIOD - (correctionEnd - correctionStart));
       }
     }
-    
-    
   }
+
+
+
 }
