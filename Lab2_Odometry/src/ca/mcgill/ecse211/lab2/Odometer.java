@@ -9,8 +9,8 @@ import static ca.mcgill.ecse211.lab2.Resources.*;
 
 /**
  * The odometer class keeps track of the robot's (x, y, theta) position.
- * it implements runnable
- *
+ * It implements runnable and determines the x, and theta values based on
+ * the magnitude and speed of the revolutions of the wheels.
  */
 
 public class Odometer implements Runnable {
@@ -91,6 +91,9 @@ public class Odometer implements Runnable {
 
   /**
    * This method is where the logic for the odometer will run.
+   * It gets the current tacho counts and computes the wheel displacements.
+   * Also, it computes the vehicle displacement and change in heading. From this, 
+   * it computes the displacement in terms of x and y.
    */
   public void run() {
     long updateStart, updateEnd;
@@ -101,27 +104,32 @@ public class Odometer implements Runnable {
 
       double distL , distR , deltaD , deltaT,  dX , dY ;
 
-      nowTachoL = leftMotor.getTachoCount();
-      nowTachoR = rightMotor.getTachoCount();
+      //get the current tacho count for left/right motor
+      nowTachoL = leftMotor.getTachoCount(); 
+      nowTachoR = rightMotor.getTachoCount(); 
 
-      // TODO Calculate new robot position based on tachometer counts
-      distL = Math.PI*WR*(nowTachoL-lastTachoL)/180;   // compute wheel
-      distR = Math.PI*WR*(nowTachoR-lastTachoR)/180;   // displacements
+      //compute wheel displacements
+      distL = Math.PI*WR*(nowTachoL-lastTachoL)/180;   
+      distR = Math.PI*WR*(nowTachoR-lastTachoR)/180;  
 
-      lastTachoL = nowTachoL;  // save tacho counts for next iteration 
+      //set current tacho as last tacho 
+      lastTachoL = nowTachoL;  
       lastTachoR = nowTachoR;
       
-      deltaD = 0.5 * (distL + distR);       // compute vehicle displacement 
-      deltaT = Math.toDegrees(((distL - distR) / WB));        // compute change in heading
-      //theta += deltaT;            // update heading 
+      //compute vehicle displacement 
+      deltaD = 0.5 * (distL + distR);
       
+      //compute change in heading
+      deltaT = Math.toDegrees(((distL - distR) / WB));       
+      
+      //update heading 
       odo.update(0, 0, deltaT);
       
-      dX = deltaD * Math.sin(Math.toRadians(odo.getXYT()[2]));    // compute X component of displacement 
-      dY = deltaD * Math.cos(Math.toRadians(odo.getXYT()[2]));  // compute Y component of displacement 
+      //compute X and Y component of displacement 
+      dX = deltaD * Math.sin(Math.toRadians(odo.getXYT()[2]));    
+      dY = deltaD * Math.cos(Math.toRadians(odo.getXYT()[2]));  
 
-      // TODO Update odometer values with new calculated values, eg
-      //odo.update(dx, dy, dtheta);
+      //update x and y
       odo.update(dX, dY, 0);
 
       // this ensures that the odometer only runs once every period
