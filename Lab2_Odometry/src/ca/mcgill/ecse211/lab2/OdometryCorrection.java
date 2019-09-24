@@ -7,77 +7,72 @@ import lejos.hardware.Sound;
 //import lejos.robotics.SampleProvider;
 
 /**
- * This class specifies the algorithm for correction the odometry mechanism on
- * the EV3 robot. 
+ * 
+ * the OdometryCorrection class specifies the code for the EV3 robot
+ * when the robot hits a line, it counts it
+ * the values of x and y are SET at each black line
+ * @author Sabrina
+ *
  */
 public class OdometryCorrection implements Runnable {
-  //sets correction frequency, controlling each correction loop at 10ms
+  //correction frequency period of 10
   private static final long CORRECTION_PERIOD = 10;
-  private static final double THRESHOLD = 1.0;
+
 
   private double[] position;
 
-
   /*
-   * Here is where the odometer correction code should be run.
+   *where the odometry correction should run
    */
   public void run() {
     long correctionStart, correctionEnd;
-
-
-
-    // keeps track of how many lines detected on x and y axis
-    int xCount = -1, yCount = -1;
+    
+    int xCount = -1, yCount = -1; // counts how many lines in x and y
 
     double newX, newY;
-    while (true) { // while it's detecting lines
-      
+    while (true) { // while the robot is detecting lines
+
       correctionStart = System.currentTimeMillis();
 
       myColorSample.fetchSample(sampleColor, 0);
 
-      //current position
+      //get current position
       position = odometer.getXYT();
       double theta = position[2] % 360;
 
-      //to plot the data points
-      //      numSamples++;
-      //      System.out.println(numSamples + "," + sampleColor[0]*1000);
-
       //when the sensor detects a line
-      if((sampleColor[0] * 1000) < 175 && (sampleColor[0] * 1000) > 100) //change to differential calculation instead of abs value
-      {
-        Sound.beep();
-        if(theta > (0 - THRESHOLD) * Math.PI / 180.0 && theta < (0 + THRESHOLD) * Math.PI / 180.0) //angle is 0: up
-        {
-          yCount++;
+      if((sampleColor[0] * 1000) < 175 && (sampleColor[0] * 1000) > 100) {
+        
+        if((theta <= 45.0 && theta >= 0)  || (theta >= 323 && theta < 360)) { // angle is between 45 and 0 and 325 to 360
+          // y augment x stays the same
           Sound.beep();
-          newY = yCount * TILE_SIZE;// / Math.cos(theta);
+          yCount++;
+          newY = yCount * TILE_SIZE;
           odometer.setY(newY);
           odometer.setTheta(0);
         }
-        else if(theta > (90 - THRESHOLD) * Math.PI / 180.0 && theta < (90 + THRESHOLD) * Math.PI / 180.0) //angle is 90: right
-        {
+        else if(theta >= 70 && theta < 150) { //if theta is higher than 70 and lower than 150
+          // x augments y stay the same
+        Sound.beep();
           xCount++;
-          newX = xCount * TILE_SIZE;// / Math.cos(theta - 90);
-          Sound.beep();
+          newX = xCount * TILE_SIZE;
           odometer.setX(newX);
-          odometer.setTheta((90) * Math.PI / 180.0);
+          odometer.setTheta(90); 
         }
-        else if(theta > (180 - THRESHOLD) * Math.PI / 180.0 && theta < (180 + THRESHOLD) * Math.PI / 180.0) //angle is 180: down
-        {
-          newY = yCount * TILE_SIZE; // / Math.cos(theta - 180);
+        else if(theta >= 150 && theta < 230) {// angle is higher than 150 and lower than 230
+          // y lowers, x stays the same
           Sound.beep();
+          newY = yCount * TILE_SIZE;           
           odometer.setY(newY);
-          odometer.setTheta((180) * Math.PI / 180.0);
+          odometer.setTheta(180);
           yCount--;
         }
-        else if(theta > (270 - THRESHOLD) * Math.PI / 180.0 && theta < (270 + THRESHOLD) * Math.PI / 180.0) //angle is 270: left
-        {
-          newX = xCount * TILE_SIZE; // / Math.cos(theta - 270);
+        else if(theta >= 230 && theta < 324) {//angle is higher than 230 and lower than 324
+          // y stays the same x lowers
           Sound.beep();
+          newX = xCount * TILE_SIZE; 
           odometer.setX(newX);
-          odometer.setTheta((270) * Math.PI / 180.0);
+          odometer.setTheta(270);
           xCount--;
         } 
       }

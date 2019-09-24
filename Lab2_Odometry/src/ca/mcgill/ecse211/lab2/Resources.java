@@ -23,8 +23,8 @@ public class Resources {
   
   /**
    * The robot width in centimeters.
-   */
-  public static final double TRACK = 10.1;
+   if turns too much lower, if turns not enoughm go up*/ 
+  public static final double TRACK = 9.8;
   
   /**
    * The speed at which the robot moves forward in degrees per second.
@@ -34,12 +34,12 @@ public class Resources {
   /**
    * The speed at which the robot rotates in degrees per second.
    */
-  public static final int ROTATE_SPEED = 150;
+  public static final int ROTATE_SPEED = 120;
   
   /**
    * The motor acceleration in degrees per second squared.
    */
-  public static final int ACCELERATION = 3000;
+  public static final int ACCELERATION = 2000;
   
   /**
    * Timeout period in milliseconds.
