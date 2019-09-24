@@ -109,8 +109,8 @@ public class Odometer implements Runnable {
       nowTachoR = rightMotor.getTachoCount(); 
 
       //compute wheel displacements
-      distL = Math.PI*WR*(nowTachoL-lastTachoL)/180;   
       distR = Math.PI*WR*(nowTachoR-lastTachoR)/180;  
+      distL = Math.PI*WR*(nowTachoL-lastTachoL)/180;   
 
       //set current tacho as last tacho 
       lastTachoL = nowTachoL;  
