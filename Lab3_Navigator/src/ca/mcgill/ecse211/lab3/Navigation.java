@@ -1,171 +1,123 @@
 package ca.mcgill.ecse211.lab3;
-/*
- * File: Navigation.java
- * Written by: Sean Lawlor
- * ECSE 211 - Design Principles and Methods, Head TA
- * Fall 2011
- * Ported to EV3 by: Francois Ouellet Delorme
- * Fall 2015
- * Helper methods - Jonah Caplan
- * 2015
- * Refactored codebase (see GitHub for future changes) - Younes Boubekeur
- * Winter 2019
- * 
- * 
- * Movement control class (turnTo, travelTo, flt, localize)
- */
 
-import static ca.mcgill.ecse211.lab3.Resources.*;
-//static imports to avoid duplicating variables and make the code easier to read
-import static java.lang.Math.*;
 
-/**
- * Class that offers static methods used for navigation.
- */
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.robotics.SampleProvider;
+/** Navigation class calculates the distances and turning angles needed for navigation */
 public class Navigation {
-  
-  static {
-    leftMotor.setAcceleration(ACCELERATION);
-    rightMotor.setAcceleration(ACCELERATION);
-  }
+	/* Declaring all the necessary variables */
+	private static OdometerData odometer;
+	private static double deltaX;
+	private static double deltaY;
+	public static double turnToTheta;
+	private static double currentTheta;
+	private static double deltaTheta;
+	private static double distance;
+	public static int increment;
+	private static double[] robotPosition = new double[3];
+	public static double[] nextWayPoint = new double[2];
 
-  /**
-   * Sets the motor speeds jointly.
-   */
-  public static void setSpeeds(float leftSpeed, float rightSpeed) {
-    leftMotor.setSpeed(leftSpeed);
-    rightMotor.setSpeed(rightSpeed);
-    if (leftSpeed < 0) {
-      leftMotor.backward();
-    } else {
-      leftMotor.forward();
-    }
-    if (rightSpeed < 0) {
-      rightMotor.backward();
-    } else {
-      rightMotor.forward();
-    }
-  }
-
-  /**
-   * Floats the two motors jointly.
-   */
-  public static void setFloat() {
-    leftMotor.stop();
-    rightMotor.stop();
-    leftMotor.flt(true);
-    rightMotor.flt(true);
-  }
-
-  /**
-   * Travels to designated position, while constantly updating its heading.
-   * 
-   * @param x the destination x, in cm.
-   * @param y the destination y, in cm.
-   */
-  public static void travelTo(double x, double y) {
-    double minAng;
-    while (!isDone(x, y)) {
-      minAng = getDestAngle(x, y);
-      turnTo(minAng, false);
-      setSpeeds(FAST, FAST);
-    }
-    setSpeeds(0, 0);
-  }
-  
-  /**
-   * Travels to designated position, while constantly updating the heading.
-   * @param x
-   * @param y
-   * @param avoid
-   */
-  public static void travelTo(double x, double y, boolean avoid) {
-    if (avoid) {
-      ObstacleAvoidance.destx = x;
-      ObstacleAvoidance.desty = y;
-      
-      // This will trigger the state machine running in the obstacleAvoidance thread
-      ObstacleAvoidance.traveling = true; 
-    } else {
-      Navigation.travelTo(x, y);
-    }
-  }
-
-  /**
-   * Returns {@code true} when done.
-   * 
-   * @param x
-   * @param y
-   * @return {@code true} when done.
-   */
-  public static boolean isDone(double x, double y) {
-    return abs(x - odometer.getX()) < CM_ERR
-        && abs(y - odometer.getY()) < CM_ERR;
-  }
-
-  /**
-   * Returns {@code true} when facing destination.
-   * 
-   * @param angle
-   * @return {@code true} when facing destination.
-   */
-  public static boolean facingDest(double angle) {
-    return abs(angle - odometer.getTheta()) < DEG_ERR;
-  }
-
-  /**
-   * Returns the destination angle.
-   * 
-   * @param x
-   * @param y
-   * @return the destination angle.
-   */
-  public static double getDestAngle(double x, double y) {
-    double minAng = (atan2(y - odometer.getY(), x - odometer.getX())) * (180.0 / PI);
-    if (minAng < 0) {
-      minAng += 360.0;
-    }
-    return minAng;
-  }
-
-  /**
-   * Turns robot towards the indicated angle.
-   * 
-   * @param angle
-   * @param stop controls whether or not to stop the motors when the turn is completed
-   */
-  public static void turnTo(double angle, boolean stop) {
-    double error = angle - odometer.getTheta();
-
-    while (abs(error) > DEG_ERR) {
-      error = angle - odometer.getTheta();
-
-      if (error < -180.0) {
-        setSpeeds(-SLOW, SLOW);
-      } else if (error < 0.0) {
-        setSpeeds(SLOW, -SLOW);
-      } else if (error > 180.0) {
-        setSpeeds(SLOW, -SLOW);
-      } else {
-        setSpeeds(-SLOW, SLOW);
-      }
-    }
-
-    if (stop) {
-      setSpeeds(0, 0);
-    }
-  }
-  
-  /**
-   * Moves robot forward a set distance in cm.
-   * 
-   * @param distance
-   * @param avoid
-   */
-  public static void goForward(double distance, boolean avoid) {
-    double x = odometer.getX() + cos(toRadians(odometer.getTheta())) * distance;
-    double y = odometer.getY() + sin(toRadians(odometer.getTheta())) * distance;
-
-    travelTo(x, y, avoid);
-  }
+	/*
+	 * @param leftMotor
+	 * @param rightMotor
+	 * @param leftRadius
+	 * @param rightRadius
+	 * @param track
+	 * @param positionWaypoints
+	 * @param us_Distance
+	 * @param obstacle_Avoidance
+	 * @throws OdometerExceptions
+	 */
+	
+	/** This method is the main method of this class, it calculates the necessary distances 
+	 * and turning angles and calls the appropriate methods */
+	public static void navigationControl(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
+		      double leftRadius, double rightRadius, double track, double[] positionWaypoints, SampleProvider us_Distance, boolean obstacle_Avoidance) throws OdometerExceptions {
+		/* Here we get the odometer instance for use in the calculations, and begin a for loop which 
+		 * calculates the necessary operations for every waypoint
+		 */
+		odometer = Odometer.getOdometer();
+		for(increment = 0; increment < 5; increment++) {
+			//System.out.println("This is the #"+increment+" leg");
+			//Robot position determined
+			robotPosition = odometer.getXYT();
+			//System.out.println("Current X position is: "+robotPosition[0]+"     Current Y position is: "+robotPosition[1]+"       Current Theta is: "+robotPosition[2]);
+			//Next waypoint is set to the nextWayPoint variable
+			nextWayPoint[0] = positionWaypoints[increment*2] * 30.48;
+			nextWayPoint[1] = positionWaypoints[increment*2 + 1] * 30.48;
+			//DeltaX and DeltaY are determined
+			deltaX = nextWayPoint[0] - robotPosition[0];
+			deltaY = nextWayPoint[1] - robotPosition[1];
+			//System.out.println("Delta X is: "+deltaX);
+			//System.out.println("Delta Y is: "+deltaY);
+			//Turning angle is determined
+			turnToTheta = Math.atan(deltaX/deltaY);
+			turnToTheta = Math.toDegrees(turnToTheta);
+			//The next 4 if statements are used to account for certain
+			//situations in which the angle calculation isnt totally correct
+			if(deltaX > 0 && deltaY < 0) {
+				turnToTheta = turnToTheta + 180;
+			}
+			if(deltaX < 0 && deltaY < 0) {
+				turnToTheta = turnToTheta - 180;
+			}
+			if(turnToTheta < 0) {
+				turnToTheta = turnToTheta + 360;
+			}
+			if(deltaX == 0) {
+				if(deltaY > 0) {
+					turnToTheta = 0;
+				}
+				else if(deltaY < 0) {
+					turnToTheta = 180;
+				}
+			}
+			//Distance we need to travel is determined
+			distance = Math.sqrt(Math.pow(deltaX, 2)+Math.pow(deltaY, 2));
+			currentTheta = robotPosition[2];
+			//Turnto class is called first, followed by the travel to class
+			turnTo(leftMotor, rightMotor, leftRadius, rightRadius, track, turnToTheta, currentTheta);
+			//The ultrasonic instance and obstacle avoidance boolean are passed here as well
+			travelTo(leftMotor, rightMotor, leftRadius, rightRadius, track, distance, us_Distance, obstacle_Avoidance);
+		}
+		
+	}
+	/** The travelTo method determined whether obstacle avoidance is necessary, and directs the robot */
+	public static void travelTo(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
+		      double leftRadius, double rightRadius, double track, double distance, SampleProvider us_Distance, boolean obstacle_Avoidance) throws OdometerExceptions {
+		//If the obstacle avoidance boolean is true, the obstacle avoidance method is run with the us sensor passed
+		if(obstacle_Avoidance) {
+			Driver.obstacle_Driver(leftMotor, rightMotor, leftRadius, rightRadius, track, distance, us_Distance);
+		}
+		else {
+		Driver.drive(leftMotor, rightMotor, leftRadius, rightRadius, track, distance);
+		}
+	}
+	
+	/** turnTo method calculates the deltaTheta required and calls the turning method in driver */
+	public static void turnTo(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
+		      double leftRadius, double rightRadius, double track, double turnToTheta, double currentTheta) {
+		if(currentTheta >= 355 || currentTheta <= 5) {
+			currentTheta = 0;
+		}
+		deltaTheta  = turnToTheta - currentTheta;
+		if(deltaTheta > 180) {
+			deltaTheta = deltaTheta - 360;
+		}
+		else if(deltaTheta < -180) {
+			deltaTheta = deltaTheta + 360;
+		}
+		//System.out.println("CurrentTheta is: "+currentTheta);
+		//System.out.println("turnToTheta is: "+turnToTheta);
+		//System.out.println("DeltaTheta is"+deltaTheta);
+		if (deltaTheta < 0) {
+			//System.out.println("Turning left!");
+			Driver.turn(leftMotor, rightMotor, leftRadius, rightRadius, track, deltaTheta);
+		}
+		else if (deltaTheta > 0) {
+			//System.out.println("Turning right!");
+			Driver.turn(leftMotor, rightMotor, leftRadius, rightRadius, track, deltaTheta);
+		}
+		
+	}
 }

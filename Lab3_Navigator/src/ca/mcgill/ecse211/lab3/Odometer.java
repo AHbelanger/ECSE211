@@ -1,206 +1,142 @@
+/**
+ * This class is meant as a skeleton for the odometer class to be used.
+ * 
+ * @author Rodrigo Silva
+ * @author Dirk Dubois
+ * @author Derek Yu
+ * @author Karim El-Baba
+ * @author Michael Smith
+ */
+
 package ca.mcgill.ecse211.lab3;
 
-import static ca.mcgill.ecse211.lab3.Resources.*;
+import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
-/*
- * File: Odometer.java
- * Written by: Sean Lawlor
- * ECSE 211 - Design Principles and Methods, Head TA
- * Fall 2011
- * Ported to EV3 by: Francois Ouellet Delorme
- * Fall 2015
- * Changed to Thread - Jonah Caplan
- * 2015
- * Refactored codebase (see GitHub for future changes) - Younes Boubekeur
- * Winter 2019
- * 
- * Class which controls the odometer for the robot
- * 
- * Odometer defines coordinate system as such...
- * 
- *                    90Deg:pos y-axis
- *                         |
- *                         |
- *                         |
- *                         |
- * 180Deg:neg x-axis------------------0Deg:pos x-axis
- *                         |
- *                         |
- *                         |
- *                         |
- *                   270Deg:neg y-axis
- * 
- * The odometer is initialized to 90 degrees, assuming the robot is facing up the positive y-axis
- * 
- */
+public class Odometer extends OdometerData implements Runnable {
 
+  private OdometerData odoData;
+  private static Odometer odo = null; // Returned as singleton
 
-// static imports to avoid duplicating variables and make the code easier to read
-import static java.lang.Math.*;
+  // Motors and related variables
+  private int leftMotorTachoCount;
+  private int rightMotorTachoCount;
+  private int pastleftMotorTachoCount;
+  private int pastrightMotorTachoCount;
+  private EV3LargeRegulatedMotor leftMotor;
+  private EV3LargeRegulatedMotor rightMotor;
 
-/**
- * The odometer class.
- */
-public class Odometer implements Runnable {
+  private final double TRACK;
+  private final double WHEEL_RAD;
 
-  private double x, y, theta;
-  private double[] oldDH = new double[2];
-  private double[] dDH = new double[2];
-
-  /**
-   * Constructs an Odometer object.
-   */
-  public Odometer() {
-    this.x = 0.0;
-    this.y = 0.0;
-    this.theta = 90.0;
-  }
-
-  /**
-   * Calculates displacement and heading.
-   */
-  private void calculateDisplacementAndHeading(double[] data) {
-    int leftTacho = leftMotor.getTachoCount();
-    int rightTacho = rightMotor.getTachoCount();
-
-    data[0] = (leftTacho * LEFT_RADIUS + rightTacho * RIGHT_RADIUS) * PI / 360.0;
-    data[1] = (rightTacho * RIGHT_RADIUS - leftTacho * LEFT_RADIUS) / WIDTH;
-  }
-
-  /*
-   * Recomputes the odometer values using the displacement and heading changes.
-   */
-  public void run() {
-    while (true) {
-      calculateDisplacementAndHeading(dDH);
-      dDH[0] -= oldDH[0];
-      dDH[1] -= oldDH[1];
-
-      // update the position in a critical section
-      synchronized (this) {
-        theta += dDH[1];
-        theta = fixDegAngle(theta);
-
-        x += dDH[0] * cos(toRadians(theta));
-        y += dDH[0] * sin(toRadians(theta));
-      }
-
-      oldDH[0] += dDH[0];
-      oldDH[1] += dDH[1];
-
-      try {
-        Thread.sleep(TIMEOUT_PERIOD);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-
-      Log.log(Log.Sender.odometer,String.format("x: %f, y: %f, a: %f",
-            getX(), getY(), getTheta()));
-      
-    }
-  }
-
-  /**
-   * Returns the value of x.
-   * 
-   * @return the value of x.
-   */
-  public double getX() {
-    synchronized (this) {
-      return x;
-    }
-  }
-
-  /**
-   * Returns the value of y.
-   * 
-   * @return the value of y.
-   */
-  public double getY() {
-    synchronized (this) {
-      return y;
-    }
-  }
-
-  /**
-   * Returns the value of theta.
-   * 
-   * @return the value of theta.
-   */
-  public double getTheta() {
-    synchronized (this) {
-      return theta;
-    }
-  }
-
-  /**
-   * Sets x, y, and theta.
-   * 
-   * @param position an array containing [x, y, theta].
-   * @param update a boolean array that indicates which variables to update, 
-   * eg [false, true, false] to update y.
-   */
-  public void setPosition(double[] position, boolean[] update) {
-    synchronized (this) {
-      if (update[0])
-        x = position[0];
-      if (update[1])
-        y = position[1];
-      if (update[2])
-        theta = position[2];
-    }
-  }
-
-  /**
-   * Populates the input position array in the format [x, y, theta].
-   */
-  public void populatePosition(double[] position) {
-    synchronized (this) {
-      position[0] = x;
-      position[1] = y;
-      position[2] = theta;
-    }
-  }
-
-  /**
-   * Returns the position array in the format [x, y, theta].
-   * 
-   * @return the position array in the format [x, y, theta].
-   */
-  public double[] getPosition() {
-    synchronized (this) {
-      return new double[] { x, y, theta };
-    }
-  }
-
-  // static 'helper' methods
+  private double[] position;
   
-  /**
-   * Constrains the input angle to the 0 - 360 degree range.
-   * 
-   * @param angle
-   * @return the input angle rewritten in the 0 - 360 degree range.
-   */
-  public static double fixDegAngle(double angle) {
-    if (angle < 0.0)
-      angle = 360.0 + (angle % 360.0);
+  private double distL, distR, deltaD, deltaT, dX, dY, theta, x, y;
 
-    return angle % 360.0;
+
+  private static final long ODOMETER_PERIOD = 25; // odometer update period in ms
+
+  /**
+   * This is the default constructor of this class. It initiates all motors and variables once.It
+   * cannot be accessed externally.
+   * 
+   * @param leftMotor
+   * @param rightMotor
+   * @throws OdometerExceptions
+   */
+  private Odometer(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
+      final double TRACK, final double WHEEL_RAD) throws OdometerExceptions {
+    odoData = OdometerData.getOdometerData(); // Allows access to x,y,z
+                                              // manipulation methods
+    this.leftMotor = leftMotor;
+    this.rightMotor = rightMotor;
+
+    // Reset the values of x, y and z to 0
+    odoData.setXYT(0, 0, 0);
+
+    this.leftMotorTachoCount = 0;
+    this.rightMotorTachoCount = 0;
+
+    this.TRACK = TRACK;
+    this.WHEEL_RAD = WHEEL_RAD;
+
   }
 
   /**
-   * Calculates the minimum angle between two angles.
+   * This method is meant to ensure only one instance of the odometer is used throughout the code.
    * 
-   * @param a the first angle.
-   * @param b the second angle.
-   * @return the minimum angle value.
+   * @param leftMotor
+   * @param rightMotor
+   * @return new or existing Odometer Object
+   * @throws OdometerExceptions
    */
-  public static double minimumAngleFromTo(double a, double b) {
-    double d = fixDegAngle(b - a);
-
-    if (d < 180.0)
-      return d;
-    else
-      return d - 360.0;
+  public synchronized static Odometer getOdometer(EV3LargeRegulatedMotor leftMotor,
+      EV3LargeRegulatedMotor rightMotor, final double TRACK, final double WHEEL_RAD)
+      throws OdometerExceptions {
+    if (odo != null) { // Return existing object
+      return odo;
+    } else { // create object and return it
+      odo = new Odometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+      return odo;
+    }
   }
+
+  /**
+   * This class is meant to return the existing Odometer Object. It is meant to be used only if an
+   * odometer object has been created
+   * 
+   * @return error if no previous odometer exists
+   */
+  public synchronized static Odometer getOdometer() throws OdometerExceptions {
+
+    if (odo == null) {
+      throw new OdometerExceptions("No previous Odometer exits.");
+
+    }
+    return odo;
+  }
+
+  /**
+   * This method is where the logic for the odometer will run. Use the methods provided from the
+   * OdometerData class to implement the odometer.
+   */
+  // run method (required for Thread)
+  public void run() {
+    long updateStart, updateEnd;
+
+    while (true) {
+      updateStart = System.currentTimeMillis();
+      //Gets wheel count, sets it as current value
+      leftMotorTachoCount = leftMotor.getTachoCount();
+      rightMotorTachoCount = rightMotor.getTachoCount();
+      //Distance is calculated by comparing current wheel count to past wheel count
+      distL = 3.14159*this.WHEEL_RAD*(leftMotorTachoCount-pastleftMotorTachoCount)/180;
+      distR = 3.14159*this.WHEEL_RAD*(rightMotorTachoCount-pastrightMotorTachoCount)/180;
+      //Current tacho value is set to "past" tacho count
+      pastleftMotorTachoCount = leftMotorTachoCount;
+      pastrightMotorTachoCount = rightMotorTachoCount;
+      deltaD = 0.5*(distL+distR);
+      //Calculating theta/delta theta 
+      deltaT = ((distL-distR)/this.TRACK);
+      theta = theta + deltaT;
+      //Just some code to keep theta within 360 degrees
+      //dX, dY, x, and y are calculated
+      dX = deltaD*Math.sin(theta);
+      dY = deltaD*Math.cos(theta);
+      x = x + dX;
+      y = y + dY;
+      //Only dX, dY, and deltaT need to be passed to the update method
+      odo.update(dX, dY, deltaT);
+      
+      // this ensures that the odometer only runs once every period
+      updateEnd = System.currentTimeMillis();
+      if (updateEnd - updateStart < ODOMETER_PERIOD) {
+        try {
+          Thread.sleep(ODOMETER_PERIOD - (updateEnd - updateStart));
+        } catch (InterruptedException e) {
+          // there is nothing to be done
+        }
+      }
+    }
+  }
+
 }
