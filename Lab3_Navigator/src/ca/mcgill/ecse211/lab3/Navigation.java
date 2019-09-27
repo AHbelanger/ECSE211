@@ -18,16 +18,63 @@ package ca.mcgill.ecse211.lab3;
 import static ca.mcgill.ecse211.lab3.Resources.*;
 //static imports to avoid duplicating variables and make the code easier to read
 import static java.lang.Math.*;
+import lejos.robotics.SampleProvider;
 
 /**
  * Class that offers static methods used for navigation.
+ * it extend the thread class and controls movement
  */
-public class Navigation {
+public class Navigation extends Thread {
+  
+
+  // parameters for the class
+ // private Odometer odometer;
+  private int bandCenter = 10;
+  private int bandWidth = 2;
+  private int distance;
+  private SampleProvider us;
+  private float[] usData;
+  
+
+  //constants of the class
+  private static final int SWEEPING_SPEED = 175;
+  private static final int NORMAL_SPEED = 100;
+  private static final int ROTATE_SPEED = 100;
+  private static final int OBSTACLE_TOO_FAR_SPEED = 150;
+  private static final int OBSTACLE_TOO_CLOSE_SPEED = 200;
+  private static final int TO_THE_RIGHT = 45;
+  private static final int TO_THE_LEFT = -45;
+  private static final int SWITCH_ANGLE = 20;
+  private static final int SENSOR_ANGLE_AVOIDANCE = 70;
+  private static final double PI = Math.PI;
+  private static final double TILE_SIZE = 30.48;
+  private static boolean navigating = true;
   
   static {
     leftMotor.setAcceleration(ACCELERATION);
     rightMotor.setAcceleration(ACCELERATION);
   }
+  
+  /**
+   * constructor of the class, takes in the necessary info from the ultrasonic 
+   * sensor, the rest is accessed through getters
+   * 
+   * @param us
+   * @param usData
+   */
+  public Navigation(SampleProvider us, float[] usData){
+  //  this.odometer = Odometer.getOdo();
+    this.us = us;
+    this.usData = usData;
+  }
+  
+  public void run() {
+
+    for(int i=0; i<Main.NUMPOINTS; i++) {
+      travelTo(Main.four_points[i][0]*TILE_SIZE,Lab3.four_points[i][1]*TILE_SIZE);
+    }
+  }
+
 
   /**
    * Sets the motor speeds jointly.
