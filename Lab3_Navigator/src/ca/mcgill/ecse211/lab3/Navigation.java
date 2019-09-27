@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.lab3;
 
+import java.lang.reflect.Array;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
