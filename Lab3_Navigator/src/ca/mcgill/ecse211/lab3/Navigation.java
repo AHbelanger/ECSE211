@@ -22,14 +22,14 @@ public class Navigation {
 	 * @param WR
 	 * @param track
 	 * @param positionWaypoints
-	 * @param us_Distance
-	 * @param obstacle_Avoidance
+	 * @param ultrasonicDistance
+	 * @param avoidObstacle
 	 * @throws OdometerExceptions
 	 */
 	
 	/** This method is the main method of this class, it calculates the necessary distances 
 	 * and turning angles and calls the appropriate methods */
-	public static void navigationControl(double[] positionWaypoints, SampleProvider us_Distance, boolean obstacle_Avoidance) {
+	public static void navigationControl(double[] positionWaypoints, SampleProvider ultrasonicDistance, boolean avoidObstacle) {
 		/* Here we get the odometer instance for use in the calculations, and begin a for loop which 
 		 * calculates the necessary operations for every waypoint
 		 */
@@ -39,8 +39,8 @@ public class Navigation {
 			robotPosition = odometer.getXYT();
 			//System.out.println("Current X position is: "+robotPosition[0]+"     Current Y position is: "+robotPosition[1]+"       Current Theta is: "+robotPosition[2]);
 			//Next waypoint is set to the nextWayPoint variable
-			nextWayPoint[0] = positionWaypoints[increment*2] * 30.48 - 30.48;
-			nextWayPoint[1] = positionWaypoints[increment*2 + 1] * 30.48 - 30.48;
+			nextWayPoint[0] = positionWaypoints[increment*2] * TILE_SIZE - TILE_SIZE;
+			nextWayPoint[1] = positionWaypoints[increment*2 + 1] * TILE_SIZE - TILE_SIZE;
 			//DeltaX and DeltaY are determined
 			deltaX = nextWayPoint[0] - robotPosition[0];
 			deltaY = nextWayPoint[1] - robotPosition[1];
@@ -74,15 +74,15 @@ public class Navigation {
 			//Turnto class is called first, followed by the travel to class
 			turnTo(turnToTheta, currentTheta);
 			//The ultrasonic instance and obstacle avoidance boolean are passed here as well
-			travelTo(distance, us_Distance, obstacle_Avoidance);
+			travelTo(distance, ultrasonicDistance, avoidObstacle);
 		}
 		
 	}
 	/** The travelTo method determined whether obstacle avoidance is necessary, and directs the robot */
-	public static void travelTo(double distance, SampleProvider us_Distance, boolean obstacle_Avoidance) {
+	public static void travelTo(double distance, SampleProvider ultrasonicDistance, boolean avoidObstacle) {
 		//If the obstacle avoidance boolean is true, the obstacle avoidance method is run with the us sensor passed
-		if(obstacle_Avoidance) {
-			ObstacleAvoidance.obstacle_Driver(distance, us_Distance);
+		if(avoidObstacle) {
+			ObstacleAvoidance.obstacle_Driver(distance, ultrasonicDistance);
 		}
 		else {
 		ObstacleAvoidance.drive(distance);
