@@ -3,21 +3,13 @@ package ca.mcgill.ecse211.lab3;
 import java.text.DecimalFormat;
 import static ca.mcgill.ecse211.lab3.Resources.*;
 
-/**
- * This class is used to display the content of the odometer variables (x, y, Theta)
- */
-public class Display implements Runnable {
+public class LCDInfo implements Runnable {
 
-  private double[] pos;
-  private final long DISPLAY_PERIOD = 100;
+  private double[] position;
+  private final long DISPLAY_PERIOD = 25;
+  private long timeout = Long.MAX_VALUE;
 
-  /**
-   * This is the class constructor
-   * 
-   * @param odoData
-   * @throws OdometerExceptions 
-   */
-  public Display() {
+  public LCDInfo() {
   }
 
   public void run() {
@@ -27,17 +19,18 @@ public class Display implements Runnable {
     long updateStart, updateEnd;
 
     long tStart = System.currentTimeMillis();
+    
     do {
       updateStart = System.currentTimeMillis();
-
+      
       // Retrieve x, y and Theta information
-      pos = odometer.getXYT();
+      position = odometer.getXYT();
       
       // Print x,y, and theta information
       DecimalFormat numberFormat = new DecimalFormat("######0.00");
-      LCD.drawString("X: " + numberFormat.format(pos[0]), 0, 0);
-      LCD.drawString("Y: " + numberFormat.format(pos[1]), 0, 1);
-      LCD.drawString("T: " + numberFormat.format(pos[2]), 0, 2);
+      LCD.drawString("X: " + numberFormat.format(position[0]), 0, 0);
+      LCD.drawString("Y: " + numberFormat.format(position[1]), 0, 1);
+      LCD.drawString("T: " + numberFormat.format(position[2]), 0, 2);
  
       // this ensures that the data is updated only once every period
       updateEnd = System.currentTimeMillis();
@@ -48,7 +41,7 @@ public class Display implements Runnable {
           e.printStackTrace();
         }
       }
-    } while ((updateEnd - tStart) <= Long.MAX_VALUE);
+    } while ((updateEnd - tStart) <= timeout);
 
   }
 

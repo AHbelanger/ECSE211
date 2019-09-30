@@ -66,7 +66,10 @@ public class Resources {
    */
   public static final TextLCD LCD = LocalEV3.get().getTextLCD();
   
-  public static final Port us_Port = LocalEV3.get().getPort("S1");
+  /**
+   * The ultrasonic port.
+   */
+  public static final Port ultrasonicPort = LocalEV3.get().getPort("S1");
  
   
   /**
