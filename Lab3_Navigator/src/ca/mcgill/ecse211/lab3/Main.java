@@ -5,7 +5,7 @@ import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
-import ca.mcgill.ecse211.lab3.Resources;
+import static ca.mcgill.ecse211.lab3.Resources.*;
 
 
 public class Main {
@@ -19,7 +19,6 @@ public class Main {
 //  public static final double[] positionWaypoints = {1,2,2,3,2,1,3,2,3,3}; //Map4
 
 	public static boolean obstacle_Avoidance = false;
-	public static TextLCD lcd = Resources.lcd;
 	
 	
 	
@@ -29,20 +28,20 @@ public class Main {
 		/* Setting up the Odometer, display, and US Sensor */
 		Odometer odometer = Odometer.getOdometer();
 		
-		Display odometryDisplay = new Display(lcd);
+		Display odometryDisplay = new Display();
 		
 		@SuppressWarnings("resource")
-		SensorModes us_Sensor = new EV3UltrasonicSensor(Resources.us_Port);
+		SensorModes us_Sensor = new EV3UltrasonicSensor(us_Port);
 		final SampleProvider us_Distance = us_Sensor.getMode("Distance");
 		
 		do {
 			/* Hear we clear the display, and set up the menu options we want */
-			lcd.clear();
+			LCD.clear();
 			
-			lcd.drawString("< Left | Right>", 0, 0);
-			lcd.drawString("       |       ", 0, 1);
-			lcd.drawString("Run Nav| Run w/", 0, 2);
-			lcd.drawString("w/o bb | bb", 0, 3);
+			LCD.drawString("< Left | Right>", 0, 0);
+			LCD.drawString("       |       ", 0, 1);
+			LCD.drawString("Run Nav| Run w/", 0, 2);
+			LCD.drawString("w/o bb | bb", 0, 3);
 			
 			buttonChoice = Button.waitForAnyPress();
 		} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);

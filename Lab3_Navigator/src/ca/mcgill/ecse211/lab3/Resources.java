@@ -64,7 +64,7 @@ public class Resources {
   /**
    * The LCD.
    */
-  public static final TextLCD lcd = LocalEV3.get().getTextLCD();
+  public static final TextLCD LCD = LocalEV3.get().getTextLCD();
   
   public static final Port us_Port = LocalEV3.get().getPort("S1");
  

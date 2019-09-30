@@ -1,19 +1,15 @@
 package ca.mcgill.ecse211.lab3;
 
 import java.text.DecimalFormat;
-import ca.mcgill.ecse211.lab3.Odometer;
-import lejos.hardware.lcd.TextLCD;
+import static ca.mcgill.ecse211.lab3.Resources.*;
 
 /**
  * This class is used to display the content of the odometer variables (x, y, Theta)
  */
 public class Display implements Runnable {
 
-  private Odometer odo;
-  private TextLCD lcd;
-  private double[] position;
-  private final long DISPLAY_PERIOD = 25;
-  private long timeout = Long.MAX_VALUE;
+  private double[] pos;
+  private final long DISPLAY_PERIOD = 100;
 
   /**
    * This is the class constructor
@@ -21,26 +17,12 @@ public class Display implements Runnable {
    * @param odoData
    * @throws OdometerExceptions 
    */
-  public Display(TextLCD lcd) {
-    odo = Odometer.getOdometer();
-    this.lcd = lcd;
-  }
-
-  /**
-   * This is the overloaded class constructor
-   * 
-   * @param odoData
-   * @throws OdometerExceptions 
-   */
-  public Display(TextLCD lcd, long timeout){
-    odo = Odometer.getOdometer();
-    this.timeout = timeout;
-    this.lcd = lcd;
+  public Display() {
   }
 
   public void run() {
     
-    lcd.clear();
+    LCD.clear();
     
     long updateStart, updateEnd;
 
@@ -49,13 +31,13 @@ public class Display implements Runnable {
       updateStart = System.currentTimeMillis();
 
       // Retrieve x, y and Theta information
-      position = odo.getXYT();
+      pos = odometer.getXYT();
       
       // Print x,y, and theta information
       DecimalFormat numberFormat = new DecimalFormat("######0.00");
-      lcd.drawString("X: " + numberFormat.format(position[0]), 0, 0);
-      lcd.drawString("Y: " + numberFormat.format(position[1]), 0, 1);
-      lcd.drawString("T: " + numberFormat.format(position[2]), 0, 2);
+      LCD.drawString("X: " + numberFormat.format(pos[0]), 0, 0);
+      LCD.drawString("Y: " + numberFormat.format(pos[1]), 0, 1);
+      LCD.drawString("T: " + numberFormat.format(pos[2]), 0, 2);
  
       // this ensures that the data is updated only once every period
       updateEnd = System.currentTimeMillis();
@@ -66,7 +48,7 @@ public class Display implements Runnable {
           e.printStackTrace();
         }
       }
-    } while ((updateEnd - tStart) <= timeout);
+    } while ((updateEnd - tStart) <= Long.MAX_VALUE);
 
   }
 
