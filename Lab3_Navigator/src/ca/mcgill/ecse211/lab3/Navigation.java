@@ -44,8 +44,8 @@ public class Navigation {
 			robotPosition = odometer.getXYT();
 			//System.out.println("Current X position is: "+robotPosition[0]+"     Current Y position is: "+robotPosition[1]+"       Current Theta is: "+robotPosition[2]);
 			//Next waypoint is set to the nextWayPoint variable
-			nextWayPoint[0] = positionWaypoints[increment*2] * 30.48;
-			nextWayPoint[1] = positionWaypoints[increment*2 + 1] * 30.48;
+			nextWayPoint[0] = positionWaypoints[increment*2] * 30.48 - 30.48;
+			nextWayPoint[1] = positionWaypoints[increment*2 + 1] * 30.48 - 30.48;
 			//DeltaX and DeltaY are determined
 			deltaX = nextWayPoint[0] - robotPosition[0];
 			deltaY = nextWayPoint[1] - robotPosition[1];

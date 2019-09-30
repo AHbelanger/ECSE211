@@ -10,12 +10,16 @@ import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 import ca.mcgill.ecse211.lab3.OdometerExceptions;
 
-public class Lab3 {
+public class Main {
 	
 	/*Initializing any variables this class may need */
 	public static final double WHEEL_RAD = 2.18;
 	public static final double TRACK = 10.1;
-	public static final double[] positionWaypoints = {1,0,2,1,2,2,0,2,1,1};
+//	public static final double[] positionWaypoints = {1,3,2,2,3,3,3,2,2,1}; //Map1
+//	public static final double[] positionWaypoints = {2,2,1,3,3,3,3,2,2,1}; //Map2
+	public static final double[] positionWaypoints = {2,1,3,2,3,3,1,3,2,2}; //Map3
+//  public static final double[] positionWaypoints = {1,2,2,3,2,1,3,2,3,3}; //Map4
+
 	public static boolean obstacle_Avoidance = false;
 	
 	/*Initializing Motors, and LCD */
