@@ -1,6 +1,6 @@
 package ca.mcgill.ecse211.lab3;
 
-import ca.mcgill.ecse211.lab3.Resources;
+import static ca.mcgill.ecse211.lab3.Resources.*;
 import lejos.robotics.SampleProvider;
 /** Navigation class calculates the distances and turning angles needed for navigation */
 public class Navigation {
@@ -14,7 +14,6 @@ public class Navigation {
 	public static int increment;
 	private static double[] robotPosition = new double[3];
 	public static double[] nextWayPoint = new double[2];
-	private static Odometer odometer = Resources.odometer;
 
 	/*
 	 * @param leftMotor
