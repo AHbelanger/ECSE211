@@ -10,10 +10,11 @@ import static ca.mcgill.ecse211.lab3.Resources.*;
 public class Main {
 	
     //Map Options
-//	public static final double[] positionWaypoints = {1,3,2,2,3,3,3,2,2,1}; //Map1
-//	public static final double[] positionWaypoints = {2,2,1,3,3,3,3,2,2,1}; //Map2
-	public static final double[] positionWaypoints = {2,1,3,2,3,3,1,3,2,2}; //Map3
-//  public static final double[] positionWaypoints = {1,2,2,3,2,1,3,2,3,3}; //Map4
+//	public static final double[] Waypoints = {1,3,2,2,3,3,3,2,2,1}; //Map1
+//	public static final double[] Waypoints = {2,2,1,3,3,3,3,2,2,1}; //Map2
+//	public static final double[] Waypoints = {2,1,3,2,3,3,1,3,2,2}; //Map3
+//  public static final double[] Waypoints = {1,2,2,3,2,1,3,2,3,3}; //Map4
+    public static final double[] Waypoints = {3,2,2,2,2,3,3,1}; //Demo
 
 
 	
@@ -55,7 +56,7 @@ public class Main {
 		//Start the navigation thread
 		new Thread() {
 			public void run() {
-				Navigation.navigationControl(positionWaypoints, ultrasonicDistance, avoidObstacle);
+				Navigation.navigationControl(Waypoints, ultrasonicDistance, avoidObstacle);
 			}
 		}.start();
 		

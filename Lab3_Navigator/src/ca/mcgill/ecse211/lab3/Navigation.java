@@ -11,56 +11,48 @@ public class Navigation {
 	private static double currentTheta;
 	private static double deltaTheta;
 	private static double distance;
-	public static int increment;
-	private static double[] robotPosition = new double[3];
-	public static double[] nextWayPoint = new double[2];
-
-	/*
-	 * @param leftMotor
-	 * @param rightMotor
-	 * @param WR
-	 * @param WR
-	 * @param track
-	 * @param positionWaypoints
-	 * @param ultrasonicDistance
-	 * @param avoidObstacle
-	 * @throws OdometerExceptions
-	 */
+	public static int index;
+	private static double[] pos = new double[3];
+	private static double nextX, nextY;
+	
 	
 	/** This method is the main method of this class, it calculates the necessary distances 
 	 * and turning angles and calls the appropriate methods */
-	public static void navigationControl(double[] positionWaypoints, SampleProvider ultrasonicDistance, boolean avoidObstacle) {
-		/* Here we get the odometer instance for use in the calculations, and begin a for loop which 
-		 * calculates the necessary operations for every waypoint
-		 */
-		for(increment = 0; increment < 5; increment++) {
-			//System.out.println("This is the #"+increment+" leg");
-			//Robot position determined
-			robotPosition = odometer.getXYT();
-			//System.out.println("Current X position is: "+robotPosition[0]+"     Current Y position is: "+robotPosition[1]+"       Current Theta is: "+robotPosition[2]);
-			//Next waypoint is set to the nextWayPoint variable
-			nextWayPoint[0] = positionWaypoints[increment*2] * TILE_SIZE - TILE_SIZE;
-			nextWayPoint[1] = positionWaypoints[increment*2 + 1] * TILE_SIZE - TILE_SIZE;
-			//DeltaX and DeltaY are determined
-			deltaX = nextWayPoint[0] - robotPosition[0];
-			deltaY = nextWayPoint[1] - robotPosition[1];
-			//System.out.println("Delta X is: "+deltaX);
-			//System.out.println("Delta Y is: "+deltaY);
-			//Turning angle is determined
-			turnToTheta = Math.atan(deltaX/deltaY);
-			turnToTheta = Math.toDegrees(turnToTheta);
-			//The next 4 if statements are used to account for certain
-			//situations in which the angle calculation isnt totally correct
-			if(deltaX > 0 && deltaY < 0) {
-				turnToTheta = turnToTheta + 180;
+	public static void navigationControl(double[] Waypoints, SampleProvider ultrasonicDistance, boolean avoidObstacle) {
+		
+	    //Go to each waypoint
+		for(index = 0; index < 5; index++) {
+			
+		    //Get the current position of robot
+			pos = odometer.getXYT();
+			
+			//Get next X coordinate
+			nextX = Waypoints[index* 2] * TILE_SIZE - TILE_SIZE;
+			
+			//Get next Y coordinate
+			nextY = Waypoints[index* 2 + 1] * TILE_SIZE - TILE_SIZE;
+			
+			//Compute deltaX/deltaY 
+			deltaX = nextX - pos[0];
+			deltaY = nextY - pos[1];
+			
+			//Compute angle turn 
+			turnToTheta = Math.toDegrees(Math.atan(deltaX / deltaY));
+			
+			//if positive x and negative y
+			if (deltaX > 0 && deltaY < 0) {
+				turnToTheta += 180;
 			}
-			if(deltaX < 0 && deltaY < 0) {
-				turnToTheta = turnToTheta - 180;
+			//if negative x and negative y
+			if (deltaX < 0 && deltaY < 0) {
+				turnToTheta -= 180;
 			}
-			if(turnToTheta < 0) {
-				turnToTheta = turnToTheta + 360;
+			//change negative angle to get opposite positive
+			if (turnToTheta < 0) {
+				turnToTheta += 360;
 			}
-			if(deltaX == 0) {
+			//if only moving straight or backwards
+			if (deltaX == 0) {
 				if(deltaY > 0) {
 					turnToTheta = 0;
 				}
@@ -70,7 +62,7 @@ public class Navigation {
 			}
 			//Distance we need to travel is determined
 			distance = Math.sqrt(Math.pow(deltaX, 2)+Math.pow(deltaY, 2));
-			currentTheta = robotPosition[2];
+			currentTheta = pos[2];
 			//Turnto class is called first, followed by the travel to class
 			turnTo(turnToTheta, currentTheta);
 			//The ultrasonic instance and obstacle avoidance boolean are passed here as well

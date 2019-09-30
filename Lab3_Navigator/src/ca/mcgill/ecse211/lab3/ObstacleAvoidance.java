@@ -110,7 +110,7 @@ public class ObstacleAvoidance {
 		      //The increment variable from the navigation class is decremented by 1 so that it
 		      //recalculates for the same waypoint as before following the obstacle avoidance
 		      currently_Navigating = false;
-		      Navigation.increment = Navigation.increment - 1;
+		      Navigation.index = Navigation.index - 1;
 		      break;
 		  }
 	  }
