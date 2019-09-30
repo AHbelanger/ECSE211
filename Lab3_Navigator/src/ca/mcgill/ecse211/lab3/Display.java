@@ -2,7 +2,6 @@ package ca.mcgill.ecse211.lab3;
 
 import java.text.DecimalFormat;
 import ca.mcgill.ecse211.lab3.Odometer;
-import ca.mcgill.ecse211.lab3.OdometerExceptions;
 import lejos.hardware.lcd.TextLCD;
 
 /**
@@ -22,7 +21,7 @@ public class Display implements Runnable {
    * @param odoData
    * @throws OdometerExceptions 
    */
-  public Display(TextLCD lcd) throws OdometerExceptions {
+  public Display(TextLCD lcd) {
     odo = Odometer.getOdometer();
     this.lcd = lcd;
   }
@@ -33,7 +32,7 @@ public class Display implements Runnable {
    * @param odoData
    * @throws OdometerExceptions 
    */
-  public Display(TextLCD lcd, long timeout) throws OdometerExceptions {
+  public Display(TextLCD lcd, long timeout){
     odo = Odometer.getOdometer();
     this.timeout = timeout;
     this.lcd = lcd;

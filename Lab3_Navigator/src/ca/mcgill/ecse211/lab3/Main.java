@@ -1,14 +1,12 @@
 package ca.mcgill.ecse211.lab3;
 
 import lejos.hardware.Button;
-import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
-import ca.mcgill.ecse211.lab3.OdometerExceptions;
+import ca.mcgill.ecse211.lab3.Resources;
+
 
 public class Main {
 	
@@ -21,23 +19,20 @@ public class Main {
 //  public static final double[] positionWaypoints = {1,2,2,3,2,1,3,2,3,3}; //Map4
 
 	public static boolean obstacle_Avoidance = false;
+	public static TextLCD lcd = Resources.lcd;
 	
-	/*Initializing Motors, and LCD */
-	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
-	public static final Port us_Port = LocalEV3.get().getPort("S1");
+	
 	
 	/**Main Class, runs upon robot start*/
-	public static void main(String[] args) throws ca.mcgill.ecse211.lab3.OdometerExceptions {
+	public static void main(String[] args) {
 		int buttonChoice;
 		/* Setting up the Odometer, display, and US Sensor */
-		Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+		Odometer odometer = Odometer.getOdometer();
 		
 		Display odometryDisplay = new Display(lcd);
 		
 		@SuppressWarnings("resource")
-		SensorModes us_Sensor = new EV3UltrasonicSensor(us_Port);
+		SensorModes us_Sensor = new EV3UltrasonicSensor(Resources.us_Port);
 		final SampleProvider us_Distance = us_Sensor.getMode("Distance");
 		
 		do {
@@ -66,11 +61,7 @@ public class Main {
 		/* This new threads starts the navigation thread. The obstacle avoidance boolean variable and Ultrasonic sensor instance is also passed */
 		new Thread() {
 			public void run() {
-				try {
-					Navigation.navigationControl(leftMotor, rightMotor, WHEEL_RAD, WHEEL_RAD, TRACK, positionWaypoints, us_Distance, obstacle_Avoidance);
-				} catch (OdometerExceptions e) {
-					e.printStackTrace();
-				}
+				Navigation.navigationControl(positionWaypoints, us_Distance, obstacle_Avoidance);
 			}
 		}.start();
 		

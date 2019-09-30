@@ -1,13 +1,10 @@
 package ca.mcgill.ecse211.lab3;
 
-import java.lang.reflect.Array;
-
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import ca.mcgill.ecse211.lab3.Resources;
 import lejos.robotics.SampleProvider;
 /** Navigation class calculates the distances and turning angles needed for navigation */
 public class Navigation {
 	/* Declaring all the necessary variables */
-	private static OdometerData odometer;
 	private static double deltaX;
 	private static double deltaY;
 	public static double turnToTheta;
@@ -17,12 +14,13 @@ public class Navigation {
 	public static int increment;
 	private static double[] robotPosition = new double[3];
 	public static double[] nextWayPoint = new double[2];
+	private static Odometer odometer = Resources.odometer;
 
 	/*
 	 * @param leftMotor
 	 * @param rightMotor
-	 * @param leftRadius
-	 * @param rightRadius
+	 * @param WR
+	 * @param WR
 	 * @param track
 	 * @param positionWaypoints
 	 * @param us_Distance
@@ -32,12 +30,10 @@ public class Navigation {
 	
 	/** This method is the main method of this class, it calculates the necessary distances 
 	 * and turning angles and calls the appropriate methods */
-	public static void navigationControl(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-		      double leftRadius, double rightRadius, double track, double[] positionWaypoints, SampleProvider us_Distance, boolean obstacle_Avoidance) throws OdometerExceptions {
+	public static void navigationControl(double[] positionWaypoints, SampleProvider us_Distance, boolean obstacle_Avoidance) {
 		/* Here we get the odometer instance for use in the calculations, and begin a for loop which 
 		 * calculates the necessary operations for every waypoint
 		 */
-		odometer = Odometer.getOdometer();
 		for(increment = 0; increment < 5; increment++) {
 			//System.out.println("This is the #"+increment+" leg");
 			//Robot position determined
@@ -77,27 +73,25 @@ public class Navigation {
 			distance = Math.sqrt(Math.pow(deltaX, 2)+Math.pow(deltaY, 2));
 			currentTheta = robotPosition[2];
 			//Turnto class is called first, followed by the travel to class
-			turnTo(leftMotor, rightMotor, leftRadius, rightRadius, track, turnToTheta, currentTheta);
+			turnTo(turnToTheta, currentTheta);
 			//The ultrasonic instance and obstacle avoidance boolean are passed here as well
-			travelTo(leftMotor, rightMotor, leftRadius, rightRadius, track, distance, us_Distance, obstacle_Avoidance);
+			travelTo(distance, us_Distance, obstacle_Avoidance);
 		}
 		
 	}
 	/** The travelTo method determined whether obstacle avoidance is necessary, and directs the robot */
-	public static void travelTo(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-		      double leftRadius, double rightRadius, double track, double distance, SampleProvider us_Distance, boolean obstacle_Avoidance) throws OdometerExceptions {
+	public static void travelTo(double distance, SampleProvider us_Distance, boolean obstacle_Avoidance) {
 		//If the obstacle avoidance boolean is true, the obstacle avoidance method is run with the us sensor passed
 		if(obstacle_Avoidance) {
-			Driver.obstacle_Driver(leftMotor, rightMotor, leftRadius, rightRadius, track, distance, us_Distance);
+			ObstacleAvoidance.obstacle_Driver(distance, us_Distance);
 		}
 		else {
-		Driver.drive(leftMotor, rightMotor, leftRadius, rightRadius, track, distance);
+		ObstacleAvoidance.drive(distance);
 		}
 	}
 	
 	/** turnTo method calculates the deltaTheta required and calls the turning method in driver */
-	public static void turnTo(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-		      double leftRadius, double rightRadius, double track, double turnToTheta, double currentTheta) {
+	public static void turnTo(double turnToTheta, double currentTheta) {
 		if(currentTheta >= 355 || currentTheta <= 5) {
 			currentTheta = 0;
 		}
@@ -113,11 +107,11 @@ public class Navigation {
 		//System.out.println("DeltaTheta is"+deltaTheta);
 		if (deltaTheta < 0) {
 			//System.out.println("Turning left!");
-			Driver.turn(leftMotor, rightMotor, leftRadius, rightRadius, track, deltaTheta);
+			ObstacleAvoidance.turn(deltaTheta);
 		}
 		else if (deltaTheta > 0) {
 			//System.out.println("Turning right!");
-			Driver.turn(leftMotor, rightMotor, leftRadius, rightRadius, track, deltaTheta);
+			ObstacleAvoidance.turn(deltaTheta);
 		}
 		
 	}

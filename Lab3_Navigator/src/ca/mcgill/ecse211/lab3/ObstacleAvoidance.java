@@ -1,20 +1,23 @@
-/*
- * SquareDriver.java
- */
+
 package ca.mcgill.ecse211.lab3;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.RegulatedMotor;
 import lejos.robotics.SampleProvider;
+import ca.mcgill.ecse211.lab3.Resources;
 
 /**
  * This class is used to drive the robot on the demo floor.
  */
-public class Driver {
+public class ObstacleAvoidance {
   private static final int FORWARD_SPEED = 300;
   private static final int ROTATE_SPEED = 120;
-  private static OdometerData odometer;
   private static int us_Detected_Distance;
+  private static EV3LargeRegulatedMotor leftMotor = Resources.leftMotor;
+  private static EV3LargeRegulatedMotor rightMotor = Resources.rightMotor;
+  private static double track = Resources.TRACK;
+  private static double WR = Resources.WHEEL_RAD;
+
   /**
    * This method runs the collision avoidance code
    * 
@@ -25,9 +28,8 @@ public class Driver {
    * @param width
  * @throws OdometerExceptions 
    */
-  public static void obstacle_Driver(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-      double leftRadius, double rightRadius, double track, double distance, SampleProvider us_Distance) throws OdometerExceptions{
-	  for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftMotor, rightMotor}) {
+  public static void obstacle_Driver(double distance, SampleProvider us_Distance) {
+	  for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor}) {
 	      motor.stop();
 	      //We changed the acceleration to keep the robots motion smoother
 	      motor.setAcceleration(500);
@@ -41,12 +43,12 @@ public class Driver {
 	    }
 	  boolean currently_Navigating = true;
 	  float[] sample = new float[us_Distance.sampleSize()];
-	  odometer = Odometer.getOdometer();
+	  
 	  leftMotor.setSpeed(FORWARD_SPEED);
 	  rightMotor.setSpeed(FORWARD_SPEED);
 	  //Start the robot moving foward
-	  leftMotor.rotate(convertDistance(leftRadius, distance), true);
-      rightMotor.rotate(convertDistance(rightRadius, distance), true);
+	  leftMotor.rotate(convertDistance(WR, distance), true);
+      rightMotor.rotate(convertDistance(WR, distance), true);
       try {
     	  Thread.sleep(100);
       }
@@ -77,8 +79,8 @@ public class Driver {
 		      }
 			  leftMotor.setSpeed(ROTATE_SPEED);
 			  rightMotor.setSpeed(ROTATE_SPEED);
-			  leftMotor.rotate(convertAngle(leftRadius, track, 90), true);
-		      rightMotor.rotate(-convertAngle(rightRadius, track, 90), false);
+			  leftMotor.rotate(convertAngle(WR, track, 90), true);
+		      rightMotor.rotate(-convertAngle(WR, track, 90), false);
 		      try {
 		    	  Thread.sleep(1000);
 		      }
@@ -86,8 +88,8 @@ public class Driver {
 		      }
 			  leftMotor.setSpeed(FORWARD_SPEED);
 			  rightMotor.setSpeed(FORWARD_SPEED);
-			  leftMotor.rotate(convertDistance(leftRadius, 20), true);
-		      rightMotor.rotate(convertDistance(rightRadius, 20), false);
+			  leftMotor.rotate(convertDistance(WR, 20), true);
+		      rightMotor.rotate(convertDistance(WR, 20), false);
 		      try {
 		    	  Thread.sleep(1000);
 		      }
@@ -95,8 +97,8 @@ public class Driver {
 		      }
 		      leftMotor.setSpeed(ROTATE_SPEED);
 		      rightMotor.setSpeed(ROTATE_SPEED);
-		      leftMotor.rotate(-convertAngle(leftRadius, track, 90), true);
-		      rightMotor.rotate(convertAngle(rightRadius, track, 90), false);
+		      leftMotor.rotate(-convertAngle(WR, track, 90), true);
+		      rightMotor.rotate(convertAngle(WR, track, 90), false);
 		      try {
 		    	  Thread.sleep(1000);
 		      }
@@ -104,8 +106,8 @@ public class Driver {
 		      }
 		      leftMotor.setSpeed(FORWARD_SPEED);
 		      rightMotor.setSpeed(FORWARD_SPEED);
-		      leftMotor.rotate(convertDistance(leftRadius, 30), true);
-		      rightMotor.rotate(convertDistance(rightRadius, 30), false);
+		      leftMotor.rotate(convertDistance(WR, 30), true);
+		      rightMotor.rotate(convertDistance(WR, 30), false);
 		      try {
 		    	  Thread.sleep(1000);
 		      }
@@ -121,8 +123,7 @@ public class Driver {
   }
   
   /** The normal drive method. No obstacle avoidance */
-  public static void drive(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-      double leftRadius, double rightRadius, double track, double distance) {
+  public static void drive(double distance) {
     // reset the motors
     for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftMotor, rightMotor}) {
       motor.stop();
@@ -144,8 +145,8 @@ public class Driver {
     	rightMotor.setSpeed(FORWARD_SPEED);
       
     	//Changed the tile size so that it would go the proper distance for our lab
-    	leftMotor.rotate(convertDistance(leftRadius, distance), true);
-    	rightMotor.rotate(convertDistance(rightRadius, distance), false);
+    	leftMotor.rotate(convertDistance(WR, distance), true);
+    	rightMotor.rotate(convertDistance(WR, distance), false);
     	
     	leftMotor.endSynchronization();
     	
@@ -155,8 +156,7 @@ public class Driver {
   
   /** The turn method, its directs the motors to turn by a certain theta. Can turn both 
    clockwise and counter clockwise */
-  public static void turn(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor,
-	      double leftRadius, double rightRadius, double track, double theta) {
+  public static void turn(double theta) {
 	    // reset the motors
 	    for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftMotor, rightMotor}) {
 	      motor.stop();
@@ -175,8 +175,8 @@ public class Driver {
 	      leftMotor.setSpeed(ROTATE_SPEED);
 	      rightMotor.setSpeed(ROTATE_SPEED);
 
-	      leftMotor.rotate(convertAngle(leftRadius, track, theta), true);
-	      rightMotor.rotate(-convertAngle(rightRadius, track, theta), false);
+	      leftMotor.rotate(convertAngle(WR, track, theta), true);
+	      rightMotor.rotate(-convertAngle(WR, track, theta), false);
 	  }
   
   /**
