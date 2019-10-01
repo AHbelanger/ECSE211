@@ -27,9 +27,9 @@ public class LCDInfo implements Runnable {
 
       // Print x,y, and theta information
       DecimalFormat numberFormat = new DecimalFormat("######0.00");
-      LCD.drawString("X: " + numberFormat.format(position[0]), 0, 0);
-      LCD.drawString("Y: " + numberFormat.format(position[1]), 0, 1);
-      LCD.drawString("T: " + numberFormat.format(position[2]), 0, 2);
+      LCD.drawString("X: " + numberFormat.format(position[0] + TILE_SIZE), 0, 0);
+      LCD.drawString("Y: " + numberFormat.format(position[1] + TILE_SIZE), 0, 1);
+      LCD.drawString("T: " + numberFormat.format(position[2] + TILE_SIZE), 0, 2);
 
       // this ensures that the data is updated only once every period
       updateEnd = System.currentTimeMillis();

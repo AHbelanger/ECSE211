@@ -6,12 +6,7 @@ import lejos.robotics.SampleProvider;
 /** Navigation class calculates the distances and turning angles needed for navigation */
 public class Navigation {
   /* Declaring all the necessary variables */
-  private static double deltaX;
-  private static double deltaY;
-  public static double newTheta;
-  private static double currentTheta;
-  private static double deltaTheta;
-  private static double distance;
+  private static double deltaX, deltaY, deltaT, newTheta;
   public static int index;
   private static double[] pos = new double[3];
   private static double nextX, nextY;
@@ -21,7 +16,7 @@ public class Navigation {
    * This method is the main method of this class, it calculates the necessary distances and turning angles and calls
    * the appropriate methods
    */
-  public static void navigationControl(double[] Waypoints, SampleProvider ultrasonicDistance, boolean avoidObstacle) {
+  public static void navigate(double[] Waypoints, SampleProvider ultrasonicDistance, boolean avoidObstacle) {
 
     // Go to each waypoint
     for (index = 0; index < 5; index++) {
@@ -65,6 +60,7 @@ public class Navigation {
 
       //Compute robot's orientation
       turnTo(newTheta, pos[2]);
+      
       //Compute distance to travel
       travelTo(Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2)), ultrasonicDistance, avoidObstacle);
     }
@@ -90,23 +86,27 @@ public class Navigation {
    * and @param currentTheta. It then calls the turning method of the ObstacleAvoidance.
    */
   public static void turnTo(double newTheta, double currentTheta) {
-    if (currentTheta >= 355 || currentTheta <= 5) {
-      currentTheta = 0;
-    }
-    deltaTheta = newTheta - currentTheta;
-    if (deltaTheta > 180) {
-      deltaTheta = deltaTheta - 360;
-    } else if (deltaTheta < -180) {
-      deltaTheta = deltaTheta + 360;
+//    if (currentTheta >= 355 || currentTheta <= 5) {
+//      currentTheta = 0;
+//    }
+    // compute difference in angle
+    deltaT = newTheta - currentTheta;
+
+    // find smallest angle possible
+    if (deltaT < -180) {
+      deltaT = deltaT + 360;
+    } 
+    else if (deltaT > 180) {
+      deltaT = deltaT - 360;
     }
 
-    if (deltaTheta < 0) {
-      // System.out.println("Turning left!");
-      ObstacleAvoidance.turn(deltaTheta);
-    } else if (deltaTheta > 0) {
-      // System.out.println("Turning right!");
-      ObstacleAvoidance.turn(deltaTheta);
+    // turn left
+    if (deltaT < 0) {
+      ObstacleAvoidance.turn(deltaT);
     }
-
+    // turn right
+    else if (deltaT > 0) {
+      ObstacleAvoidance.turn(deltaT);
+    }
   }
 }

@@ -1,7 +1,6 @@
 
 package ca.mcgill.ecse211.lab3;
 
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.RegulatedMotor;
 import lejos.robotics.SampleProvider;
 import static ca.mcgill.ecse211.lab3.Resources.*;
@@ -10,59 +9,57 @@ import static ca.mcgill.ecse211.lab3.Resources.*;
  * This class is used to drive the robot on the demo floor.
  */
 public class ObstacleAvoidance {
-  private static int us_Detected_Distance;
+  private static int ultrasonicDistanceMeasured;
 
   /**
-   * This method runs the collision avoidance code
-   * 
-   * @param leftMotor
-   * @param rightMotor
-   * @param leftRadius
-   * @param rightRadius
-   * @param width
-   * @throws OdometerExceptions
+   * The method driveWithObstacle takes @param distance and @param ultrasonicDistance as inputs 
+   * and drives the robot while searching for the obstacle. When it reaches the obstacle, it avoids it 
+   * by going around it.
    */
   public static void driveWithObstacle(double distance, SampleProvider ultrasonicDistance) {
-    //Stop both motors and reset their acceleration 
+    // Stop both motors and reset their acceleration
     leftMotor.stop();
     rightMotor.stop();
     leftMotor.setAcceleration(500);
     rightMotor.setAcceleration(500);
-
-//    // Sleep for 2 seconds
-//    try {
-//      Thread.sleep(500);
-//    } catch (InterruptedException e) {
-//      // There is nothing to be done here
-//    }
-    boolean isNavigating = true;
-    float[] sample = new float[ultrasonicDistance.sampleSize()];
+    
+    //sleep robot
+    try {
+      Thread.sleep(600);
+    } 
+    catch (Exception e) {
+    }
 
     leftMotor.setSpeed(FORWARD_SPEED);
     rightMotor.setSpeed(FORWARD_SPEED);
-    // Start the robot moving foward
+    
+    //Move robot forward
     leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
     rightMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+    
+    //sleep robot
     try {
       Thread.sleep(100);
-    } catch (InterruptedException e) {
-
+    } 
+    catch (Exception e) {
     }
-    // This loop runs while the robot moves, continously scanning for obstacles
+    
+    boolean isNavigating = true;
+    float[] sample = new float[ultrasonicDistance.sampleSize()];
+    
+    //Infinite loop until it meets the obstacle
     while (isNavigating) {
-      // Sensor distance is fetched
+      //Get the distance from sensor
       ultrasonicDistance.fetchSample(sample, 0);
-      us_Detected_Distance = (int) (sample[0] * 100);
+      ultrasonicDistanceMeasured = (int) (sample[0] * 100);
 
-      // If the rotation speeds of both motors are 0, it must be done traveling. Breaks the loop
-      // and returns to nav class.
+      //break loop when both left/right speeds reach 0. This means robot has stop.
       if (leftMotor.getRotationSpeed() == 0 && rightMotor.getRotationSpeed() == 0) {
         break;
       }
 
-      // This if statement runs if the distance is lower than 10
-      if (us_Detected_Distance < 10) {
-        System.out.println("Executing block avoidance");
+      //When robot reaches distance under 8 cm from robot, execute the obstacle avoidance.
+      if (ultrasonicDistanceMeasured < 8) {
         rightMotor.setSpeed(10);
         leftMotor.setSpeed(10);
 
@@ -86,66 +83,65 @@ public class ObstacleAvoidance {
         leftMotor.rotate(convertDistance(WHEEL_RAD, 30), true);
         rightMotor.rotate(convertDistance(WHEEL_RAD, 30), false);
 
-        // The increment variable from the navigation class is decremented by 1 so that it
-        // recalculates for the same waypoint as before following the obstacle avoidance
         isNavigating = false;
+        
+        //Index from the navigation class is decreased by 1 so that computation on same waypoint.
         Navigation.index = Navigation.index - 1;
         break;
       }
     }
   }
 
-  /** The normal drive method. No obstacle avoidance */
+  /**
+   *The method drive takes @param distance as input and travels for @param distance cm. 
+   */
   public static void drive(double distance) {
-    // reset the motors
-    for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftMotor, rightMotor}) {
-      motor.stop();
-      // We changed the acceleration to keep the robots motion smoother
-      motor.setAcceleration(100);
-    }
+    // Stop both motors and reset their acceleration
+    leftMotor.stop();
+    rightMotor.stop();
+    leftMotor.setAcceleration(100);
+    rightMotor.setAcceleration(100);
 
-    // Sleep for 2 seconds
+    //sleep robot
     try {
       Thread.sleep(500);
-    } catch (InterruptedException e) {
-      // There is nothing to be done here
+    } 
+    catch (Exception e) {
     }
 
-    leftMotor.synchronizeWith(new RegulatedMotor[] {rightMotor});
-    leftMotor.startSynchronization();
+    rightMotor.synchronizeWith(new RegulatedMotor[] {leftMotor});
+    rightMotor.startSynchronization();
 
     leftMotor.setSpeed(FORWARD_SPEED);
     rightMotor.setSpeed(FORWARD_SPEED);
 
-    // Changed the tile size so that it would go the proper distance for our lab
     leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
     rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 
-    leftMotor.endSynchronization();
+    rightMotor.endSynchronization();
 
     leftMotor.waitComplete();
     rightMotor.waitComplete();
   }
 
   /**
-   * The turn method, its directs the motors to turn by a certain theta. Can turn both clockwise and counter clockwise
+   * The turn method takes @param theta as input and tells the robot to change its orientation 
+   * by theta angle. 
    */
   public static void turn(double theta) {
-    // reset the motors
-    for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] {leftMotor, rightMotor}) {
-      motor.stop();
-      // We changed the acceleration to keep the robots motion smoother
-      motor.setAcceleration(500);
-    }
+    // Stop both motors and reset their acceleration
+    leftMotor.stop();
+    rightMotor.stop();
+    leftMotor.setAcceleration(500);
+    rightMotor.setAcceleration(500);
 
-    // Sleep for 2 seconds
+    //sleep robot
     try {
       Thread.sleep(500);
-    } catch (InterruptedException e) {
-      // There is nothing to be done here
+    } 
+    catch (Exception e) {
     }
 
-    // turn theta degrees counter-clockwise
     leftMotor.setSpeed(ROTATE_SPEED);
     rightMotor.setSpeed(ROTATE_SPEED);
 
@@ -154,11 +150,8 @@ public class ObstacleAvoidance {
   }
 
   /**
-   * This method allows the conversion of a distance to the total rotation of each wheel need to cover that distance.
-   * 
-   * @param radius
-   * @param distance
-   * @return
+   * The method convertDistance takes @param radius and @param distance as inputs and
+   * returns the rotation needed by each wheel to cover the distance. 
    */
   private static int convertDistance(double radius, double distance) {
     return (int) ((180.0 * distance) / (Math.PI * radius));

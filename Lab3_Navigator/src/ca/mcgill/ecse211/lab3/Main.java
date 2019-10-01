@@ -55,7 +55,7 @@ public class Main {
     // Start the navigation thread
     new Thread() {
       public void run() {
-        Navigation.navigationControl(Waypoints, ultrasonicDistance, avoidObstacle);
+        Navigation.navigate(Waypoints, ultrasonicDistance, avoidObstacle);
       }
     }.start();
 
