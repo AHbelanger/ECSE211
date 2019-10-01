@@ -1,28 +1,36 @@
-package ca.mcgill.ecse211.lab2;
+/**
+ * This class is meant as a skeleton for the odometer class to be used.
+ * 
+ * @author Rodrigo Silva
+ * @author Dirk Dubois
+ * @author Derek Yu
+ * @author Karim El-Baba
+ * @author Michael Smith
+ */
+
+package ca.mcgill.ecse211.lab3;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-//static import to avoid duplicating variables and make the code easier to read
-import static ca.mcgill.ecse211.lab2.Resources.*;
+// static import to avoid duplicating variables and make the code easier to read
+import static ca.mcgill.ecse211.lab3.Resources.*;
 
 /**
- * The odometer class keeps track of the robot's (x, y, theta) position.
- * It implements runnable and determines the x, and theta values based on
- * the magnitude and speed of the revolutions of the wheels.
+ * The odometer class keeps track of the robot's (x, y, theta) position. It implements runnable and determines the x,
+ * and theta values based on the magnitude and speed of the revolutions of the wheels.
  */
 
 public class Odometer implements Runnable {
 
-  public static final double WB = TRACK;   //wheelbase
-  public static final double WR = WHEEL_RAD;    //wheel radius
+  public static final double WB = TRACK; // wheelbase
+  public static final double WR = WHEEL_RAD; // wheel radius
 
   // Motor-related variables
-  public static int lastTachoL;   //Tacho L at last sample
-  public static int lastTachoR;   //Tacho R at last sample
-  public static int nowTachoL = 0;    //Current Tacho L
-  public static int nowTachoR = 0;    //Current Tacho R
+  public static int lastTachoL; // Tacho L at last sample
+  public static int lastTachoR; // Tacho R at last sample
+  public static int nowTachoL = 0; // Current Tacho L
+  public static int nowTachoR = 0; // Current Tacho R
 
   /**
    * The x-axis position in cm.
@@ -69,8 +77,8 @@ public class Odometer implements Runnable {
 
 
   /**
-   * This is the default constructor of this class. It initiates all motors and variables once.It
-   * cannot be accessed externally.
+   * This is the default constructor of this class. It initiates all motors and variables once.It cannot be accessed
+   * externally.
    */
   private Odometer() {
     setXYT(0, 0, 0);
@@ -90,10 +98,9 @@ public class Odometer implements Runnable {
   }
 
   /**
-   * This method is where the logic for the odometer will run.
-   * It gets the current tacho counts and computes the wheel displacements.
-   * Also, it computes the vehicle displacement and change in heading. From this, 
-   * it computes the displacement in terms of x and y.
+   * This method is where the logic for the odometer will run. It gets the current tacho counts and computes the wheel
+   * displacements. Also, it computes the vehicle displacement and change in heading. From this, it computes the
+   * displacement in terms of x and y.
    */
   public void run() {
     long updateStart, updateEnd;
@@ -102,34 +109,34 @@ public class Odometer implements Runnable {
       updateStart = System.currentTimeMillis();
 
 
-      double distL , distR , deltaD , deltaT,  dX , dY ;
+      double distL, distR, deltaD, deltaT, dX, dY;
 
-      //get the current tacho count for left/right motor
-      nowTachoL = leftMotor.getTachoCount(); 
-      nowTachoR = rightMotor.getTachoCount(); 
+      // get the current tacho count for left/right motor
+      nowTachoL = leftMotor.getTachoCount();
+      nowTachoR = rightMotor.getTachoCount();
 
-      //compute wheel displacements
-      distR = Math.PI*WR*(nowTachoR-lastTachoR)/180;  
-      distL = Math.PI*WR*(nowTachoL-lastTachoL)/180;   
+      // compute wheel displacements
+      distR = Math.PI * WR * (nowTachoR - lastTachoR) / 180;
+      distL = Math.PI * WR * (nowTachoL - lastTachoL) / 180;
 
-      //set current tacho as last tacho 
-      lastTachoL = nowTachoL;  
+      // set current tacho as last tacho
+      lastTachoL = nowTachoL;
       lastTachoR = nowTachoR;
-      
-      //compute vehicle displacement 
-      deltaD = 0.5 * (distL + distR);
-      
-      //compute change in heading
-      deltaT = Math.toDegrees(((distL - distR) / WB));       
-      
-      //update heading 
-      odo.update(0, 0, deltaT);
-      
-      //compute X and Y component of displacement 
-      dX = deltaD * Math.sin(Math.toRadians(odo.getXYT()[2]));    
-      dY = deltaD * Math.cos(Math.toRadians(odo.getXYT()[2]));  
 
-      //update x and y
+      // compute vehicle displacement
+      deltaD = 0.5 * (distL + distR);
+
+      // compute change in heading
+      deltaT = Math.toDegrees(((distL - distR) / WB));
+
+      // update heading
+      odo.update(0, 0, deltaT);
+
+      // compute X and Y component of displacement
+      dX = deltaD * Math.sin(Math.toRadians(odo.getXYT()[2]));
+      dY = deltaD * Math.cos(Math.toRadians(odo.getXYT()[2]));
+
+      // update x and y
       odo.update(dX, dY, 0);
 
       // this ensures that the odometer only runs once every period
@@ -143,6 +150,7 @@ public class Odometer implements Runnable {
       }
     }
   }
+
 
   // IT IS NOT NECESSARY TO MODIFY ANYTHING BELOW THIS LINE
 
@@ -176,8 +184,7 @@ public class Odometer implements Runnable {
   }
 
   /**
-   * Adds dx, dy and dtheta to the current values of x, y and theta, respectively. Useful for
-   * odometry.
+   * Adds dx, dy and dtheta to the current values of x, y and theta, respectively. Useful for odometry.
    * 
    * @param dx
    * @param dy
@@ -281,3 +288,5 @@ public class Odometer implements Runnable {
   }
 
 }
+
+
