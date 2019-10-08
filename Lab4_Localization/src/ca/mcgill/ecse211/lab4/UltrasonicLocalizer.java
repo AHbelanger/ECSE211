@@ -3,7 +3,7 @@ package ca.mcgill.ecse211.lab4;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.Sound;
-
+import static ca.mcgill.ecse211.lab4.Resources.*;
 
 
 public class UltrasonicLocalizer {
@@ -118,15 +118,15 @@ public class UltrasonicLocalizer {
 	}
 	
 	public void rotateClockwise() {
-		leftMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
-		rightMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 		leftMotor.backward();
 		rightMotor.forward();
 	}
 
 	public void rotateCounterClockwise() {
-		leftMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
-		rightMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 		leftMotor.forward();
 		rightMotor.backward();
 	}

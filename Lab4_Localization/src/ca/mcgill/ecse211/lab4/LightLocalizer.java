@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.lab4;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.Sound;
+import static ca.mcgill.ecse211.lab4.Resources.*;
 
 public class LightLocalizer extends Thread {
 	
@@ -25,11 +26,11 @@ public class LightLocalizer extends Thread {
 	
 	public void run(){
 		while(true){
-		leftMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
-	    rightMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
+		leftMotor.setSpeed(ROTATE_SPEED);
+	    rightMotor.setSpeed(ROTATE_SPEED);
 
-	    leftMotor.rotate(-Navigation.convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, 360),true);
-	    rightMotor.rotate(Navigation.convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, 360), true);
+	    leftMotor.rotate(-Navigation.convertAngle(WHEEL_RAD, TRACK, 360),true);
+	    rightMotor.rotate(Navigation.convertAngle(WHEEL_RAD, TRACK, 360), true);
 	    
 	    int lineCounter = 0;
 		double angleY = 0;
@@ -44,20 +45,20 @@ public class LightLocalizer extends Thread {
 		double[] angleArray = new double[5];
 		
 		while (getSensor() > 70) {
-			leftMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
-			rightMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
+			leftMotor.setSpeed(ROTATE_SPEED);
+			rightMotor.setSpeed(ROTATE_SPEED);
 			rightMotor.forward();
 			leftMotor.forward();
 		}
 		
-		leftMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
-		rightMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
-		leftMotor.rotate(Navigation.convertDistance(LocalizationLab.WHEEL_RADIUS, distBack), true);
-		rightMotor.rotate(Navigation.convertDistance(LocalizationLab.WHEEL_RADIUS, distBack), false);
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
+		leftMotor.rotate(Navigation.convertDistance(WHEEL_RAD, distBack), true);
+		rightMotor.rotate(Navigation.convertDistance(WHEEL_RAD, distBack), false);
 		
 		while(lineCounter < 4 ) {
-			leftMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
-		    rightMotor.setSpeed(LocalizationLab.ROTATION_SPEED);
+			leftMotor.setSpeed(ROTATE_SPEED);
+		    rightMotor.setSpeed(ROTATE_SPEED);
 			rightMotor.forward();
 			leftMotor.backward();
 			if (getSensor() < 30 ) {

@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.lab4;
 
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import static ca.mcgill.ecse211.lab4.Resources.*;
 
 public class Odometer extends Thread {
   // robot position
@@ -52,12 +53,12 @@ public class Odometer extends Thread {
       
         nowTachoL = leftMotor.getTachoCount();      		// get tacho counts
 		nowTachoR = rightMotor.getTachoCount();
-		distL = Math.PI * LocalizationLab.WHEEL_RADIUS * (nowTachoL-lastTachoL)/180;		// compute L and R wheel displacements
-		distR = Math.PI * LocalizationLab.WHEEL_RADIUS * (nowTachoR-lastTachoR)/180;
+		distL = Math.PI * WHEEL_RAD * (nowTachoL-lastTachoL)/180;		// compute L and R wheel displacements
+		distR = Math.PI * WHEEL_RAD * (nowTachoR-lastTachoR)/180;
 		lastTachoL = nowTachoL;								// save tacho counts for next iteration
 		lastTachoR = nowTachoR;
 		deltaD = 0.5 * (distL + distR);							// compute vehicle displacement
-		deltaT = (distL - distR)/LocalizationLab.TRACK;
+		deltaT = (distL - distR)/TRACK;
 		//headingTheta = Math.toRadians(getTheta()) + deltaT;
 		dX = deltaD * Math.sin(theta);
 	    dY = deltaD * Math.cos(theta);

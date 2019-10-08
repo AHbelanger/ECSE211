@@ -1,31 +1,15 @@
 package ca.mcgill.ecse211.lab4;
 
 import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.Button;
+import static ca.mcgill.ecse211.lab4.Resources.*;
 
 public class LocalizationLab{
-	
-	  private static final Port usPort = LocalEV3.get().getPort("S2");
-	  private static final Port lightPort = LocalEV3.get().getPort("S1");
-	  public static final EV3LargeRegulatedMotor leftMotor =
-	      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-	  public static final EV3LargeRegulatedMotor rightMotor =
-	      new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-	
-	  
-	
-	  public static final double WHEEL_RADIUS = 2.1;
-	  public static final double TRACK = 9.8;
-	  public static final int ROTATION_SPEED = 100;
-	  
-	  
 
 	  public static void main(String[] args) {
 		  

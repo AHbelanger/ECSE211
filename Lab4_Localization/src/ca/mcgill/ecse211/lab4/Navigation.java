@@ -7,6 +7,7 @@ import lejos.robotics.SampleProvider;
 import lejos.hardware.Button;
 import lejos.hardware.lcd.TextLCD;
 
+import static ca.mcgill.ecse211.lab4.Resources.*;
 
 public class Navigation {
 
@@ -54,8 +55,8 @@ public class Navigation {
 		    rightMotor.setSpeed(FORWARD_SPEED);
 		    leftMotor.forward();
 		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), true);
-		    rightMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), false);
+		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 
 
 		}
@@ -66,8 +67,8 @@ public class Navigation {
 		    rightMotor.setSpeed(FORWARD_SPEED);
 		    leftMotor.forward();
 		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), true);
-		    rightMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), false);
+		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 	
 
 		}
@@ -78,8 +79,8 @@ public class Navigation {
 		    rightMotor.setSpeed(FORWARD_SPEED);
 		    leftMotor.forward();
 		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), true);
-		    rightMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), false);
+		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 		
 		}
 		else if (eY == 0 && eX < 0){
@@ -89,8 +90,8 @@ public class Navigation {
 		    rightMotor.setSpeed(FORWARD_SPEED);
 		    leftMotor.forward();
 		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), true);
-		    rightMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), false);
+		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 		
 
 		}
@@ -103,8 +104,8 @@ public class Navigation {
 		    rightMotor.setSpeed(FORWARD_SPEED);
 		    leftMotor.forward();
 		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), true);
-		    rightMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), false);
+		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 		   
 		}
 		else if (eX < 0 && eY < 0){
@@ -114,8 +115,8 @@ public class Navigation {
 		    rightMotor.setSpeed(FORWARD_SPEED);
 		    leftMotor.forward();
 		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), true);
-		    rightMotor.rotate(convertDistance(LocalizationLab.WHEEL_RADIUS, distance), false);
+		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
 		    
 		}
 		
@@ -133,8 +134,8 @@ public class Navigation {
 		      rightMotor.setSpeed(ROTATE_SPEED);
 		     //if(error < 0){
 
-		      leftMotor.rotate(convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, (minimalAngle*180/Math.PI)), true); //+
-		      rightMotor.rotate(-convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, (minimalAngle*180/Math.PI) ), false);//-
+		      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, (minimalAngle*180/Math.PI)), true); //+
+		      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, (minimalAngle*180/Math.PI) ), false);//-
 		     // }
 		      //else{
 		    	//  leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, minimalAngle), true);
@@ -148,16 +149,16 @@ public class Navigation {
 			leftMotor.setSpeed(ROTATE_SPEED);
 		      rightMotor.setSpeed(ROTATE_SPEED);
 
-		      leftMotor.rotate(convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, Math.toDegrees(minimalAngle)), true);
-		      rightMotor.rotate(-convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, Math.toDegrees(minimalAngle)), false);
+		      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), true);
+		      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), false);
 		}
 		else if (error > Math.PI){
 			minimalAngle = error - 2*Math.PI;
 			leftMotor.setSpeed(ROTATE_SPEED);
 		      rightMotor.setSpeed(ROTATE_SPEED);
 
-		      leftMotor.rotate(convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, Math.toDegrees(minimalAngle)), true);
-		      rightMotor.rotate(-convertAngle(LocalizationLab.WHEEL_RADIUS, LocalizationLab.TRACK, Math.toDegrees(minimalAngle)), false);
+		      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), true);
+		      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), false);
 		}
 
 
