@@ -1,185 +1,181 @@
 package ca.mcgill.ecse211.lab4;
-import lejos.hardware.sensor.*;
-import lejos.hardware.ev3.LocalEV3;
-import lejos.hardware.motor.EV3LargeRegulatedMotor;
-import lejos.hardware.port.Port;
-import lejos.robotics.SampleProvider;
-import lejos.hardware.Button;
-import lejos.hardware.lcd.TextLCD;
 
 import static ca.mcgill.ecse211.lab4.Resources.*;
 
+/**
+ * Navigation class calculates the distances and turning angles needed for navigation
+ * @author Sabrina
+ *
+ */
 public class Navigation {
 
-	private static final int FORWARD_SPEED = 250;//250
-	  private static final int ROTATE_SPEED = 150; //150
-	  public static final double TILE_LENGTH = 30.48;
-	  private static final long DISPLAY_PERIOD = 250;
-	public static Object lock;
-	 static double x;
-	 static double y;
-	 static double theta;
-	 static int leftMotorTachoCount;
-	 static int rightMotorTachoCount;
-	 static int lastTachoL;
-	 static int lastTachoR;
-	 static int nowTachoL;
-	 static int nowTachoR;
-	 static double prevXc = 0;
-     static double prevYc = 0;
-     int isNavigating = 0;
-	 public static TextLCD t = LocalEV3.get().getTextLCD();
-	 private Odometer odometer;
-	private EV3LargeRegulatedMotor leftMotor, rightMotor;
-	 
-	 public Navigation(Odometer odometer,EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor) {
-		 this.odometer = odometer;
-		 this.leftMotor = leftMotor;
-		 this.rightMotor = rightMotor;
-}
+  // motor related values
+  static int leftMotorTachoCount;
+  static int rightMotorTachoCount;
+  static int lastTachoL;
+  static int lastTachoR;
+  static int nowTachoL;
+  static int nowTachoR;
+  
+  // position and angle
+  static double x;
+  static double y;
+  static double theta;
+  
 
-	  
+  /**
+   * The travelTo method takes 2 inputs @param x, @param y, 
+   * and determines the distance the robot must travel. 
+   */
+  public void travelTo (double x, double y){
+    double thetaToGo= 0;
 
-	   
+    double toX = x - odometer.getX(); // x side
+    double toY = y - odometer.getY(); // y side
+    double dist = Math.sqrt(Math.pow(toX, 2) + Math.pow(toY, 2) ); // pythagore distance
 
-	public void travelTo (double x, double y){
-		double thetaHeading = 0;
-	
-		double eX = x - odometer.getX();
-		double eY = y - odometer.getY();
-		double distance = Math.sqrt(Math.pow(eX, 2) + Math.pow(eY, 2) );
-		if (eX == 0 && eY > 0){
-			thetaHeading = Math.PI/2;
-			turnTo(thetaHeading);																																																	
-			leftMotor.setSpeed(FORWARD_SPEED);
-		    rightMotor.setSpeed(FORWARD_SPEED);
-		    leftMotor.forward();
-		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
-		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
+    // if x side is equal to 0 and y side is bigger than 0
+    if (toX == 0 && toY > 0){
+      thetaToGo = Math.PI/2;
+      turnTo(thetaToGo);                                                                                                                                                                                                    
+      leftMotor.setSpeed(FORWARD_SPEED);
+      rightMotor.setSpeed(FORWARD_SPEED);
+      leftMotor.forward();
+      rightMotor.forward();
+      
+      leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
+      rightMotor.rotate(convertDistance(WHEEL_RAD, dist), false);
 
+    }
+    
+    // if the x side is bigger than 0
+    else if (toX > 0){
+      thetaToGo = (Math.atan((toY)/(toX)));
+      turnTo(thetaToGo);
+      leftMotor.setSpeed(FORWARD_SPEED);
+      rightMotor.setSpeed(FORWARD_SPEED);
+      leftMotor.forward();
+      rightMotor.forward();
+      
+      leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
+      rightMotor.rotate(convertDistance(WHEEL_RAD, dist), false);
 
-		}
-		else if (eX == 0 && eY < 0){
-			thetaHeading = -Math.PI/2;
-			turnTo(thetaHeading);
-			leftMotor.setSpeed(FORWARD_SPEED);
-		    rightMotor.setSpeed(FORWARD_SPEED);
-		    leftMotor.forward();
-		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
-		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
-	
+    }
+    
+    // if the y side is 0 and the x side is less than 0
+    else if (toY == 0 && toX < 0){
+      thetaToGo = Math.PI;
+      turnTo(thetaToGo);
+      leftMotor.setSpeed(FORWARD_SPEED);
+      rightMotor.setSpeed(FORWARD_SPEED);
+      leftMotor.forward();
+      rightMotor.forward();
+      
+      leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
+      rightMotor.rotate(convertDistance(WHEEL_RAD, dist), false);
 
-		}
-		else if (eX > 0){
-			thetaHeading = (Math.atan((eY)/(eX)));
-			turnTo(thetaHeading);
-			leftMotor.setSpeed(FORWARD_SPEED);
-		    rightMotor.setSpeed(FORWARD_SPEED);
-		    leftMotor.forward();
-		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
-		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
-		
-		}
-		else if (eY == 0 && eX < 0){
-			thetaHeading = Math.PI;
-			turnTo(thetaHeading);
-			leftMotor.setSpeed(FORWARD_SPEED);
-		    rightMotor.setSpeed(FORWARD_SPEED);
-		    leftMotor.forward();
-		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
-		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
-		
-
-		}
-		
-	
-		else if (eX < 0 && eY > 0){
-			thetaHeading = (Math.atan((eY)/(eX))) + Math.PI;
-			turnTo(thetaHeading);
-			leftMotor.setSpeed(FORWARD_SPEED);
-		    rightMotor.setSpeed(FORWARD_SPEED);
-		    leftMotor.forward();
-		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
-		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
-		   
-		}
-		else if (eX < 0 && eY < 0){
-			thetaHeading = (Math.atan((eY)/(eX))) - Math.PI;
-			turnTo(thetaHeading);
-			leftMotor.setSpeed(FORWARD_SPEED);
-		    rightMotor.setSpeed(FORWARD_SPEED);
-		    leftMotor.forward();
-		    rightMotor.forward();
-		    leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
-		    rightMotor.rotate(convertDistance(WHEEL_RAD, distance), false);
-		    
-		}
-		
+    }
+    
+    // if x side is equal to 0 and y side less than 0
+    else if (toX == 0 && toY < 0){
+      thetaToGo = -Math.PI/2;
+      turnTo(thetaToGo);
+      leftMotor.setSpeed(FORWARD_SPEED);
+      rightMotor.setSpeed(FORWARD_SPEED);
+      leftMotor.forward();
+      rightMotor.forward();
+      
+      leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
+      rightMotor.rotate(convertDistance(WHEEL_RAD, dist), false);
 
 
+    }
+    
+    // if x side is less than 0 and y side is less than 0
+    else if (toX < 0 && toY < 0){
+      thetaToGo = (Math.atan((toY)/(toX))) - Math.PI;
+      turnTo(thetaToGo);
+      leftMotor.setSpeed(FORWARD_SPEED);
+      rightMotor.setSpeed(FORWARD_SPEED);
+      leftMotor.forward();
+      rightMotor.forward();
+      
+      leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
+      rightMotor.rotate(convertDistance(WHEEL_RAD, dist), false);
+    }
+    
+    // is x side is less than 0 and y side is bigger than 0
+    else if (toX < 0 && toY > 0){
+      thetaToGo = (Math.atan((toY)/(toX))) + Math.PI;
+      turnTo(thetaToGo);
+      leftMotor.setSpeed(FORWARD_SPEED);
+      rightMotor.setSpeed(FORWARD_SPEED);
+      leftMotor.forward();
+      rightMotor.forward();
+      
+      leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
+      rightMotor.rotate(convertDistance(WHEEL_RAD, dist), false);
 
-	}
+    }
+  }
 
-	public void turnTo (double theta){
-		double error = theta - odometer.getTheta();
-		double minimalAngle;
-		if (error >= -(Math.PI) && error <= (Math.PI)){
-			minimalAngle = error;
-			leftMotor.setSpeed(ROTATE_SPEED);
-		      rightMotor.setSpeed(ROTATE_SPEED);
-		     //if(error < 0){
+ 
+   /**
+   *  The turnTo method takes in the theta
+   *  computes the error
+   *  then moves the robot
+   *  
+   */
+  public void turnTo (double theta){
+    double error = theta - odometer.getTheta();
+    double minAngle; // minimum angle
+    
+    // if error is bigger than pi or less than or equal than pi
+    if (error >= -(Math.PI) && error <= (Math.PI)){
+      minAngle = error;
+      
+      
+      leftMotor.setSpeed(ROTATE_SPEED);
+      rightMotor.setSpeed(ROTATE_SPEED);      
+     
+      leftMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, (minAngle*180/Math.PI)), true); //+
+      rightMotor.rotate(convertAngle(WHEEL_RAD, TRACK, (minAngle*180/Math.PI) ), false);//-
+  
+    }
+    
+    // if error is less than pi (not including it
+    else if (error < -Math.PI){
+      minAngle = error + 2*Math.PI;
+      
+      // move robot
+      leftMotor.setSpeed(ROTATE_SPEED);
+      rightMotor.setSpeed(ROTATE_SPEED);
+     
+      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minAngle)), true);
+      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minAngle)), false);
+    }
+    
+    else if (error > Math.PI){
+      minAngle = error - 2*Math.PI;
+    
+      leftMotor.setSpeed(ROTATE_SPEED);
+      rightMotor.setSpeed(ROTATE_SPEED);
+      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minAngle)), true);
+      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minAngle)), false);
+    }
 
-		      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, (minimalAngle*180/Math.PI)), true); //+
-		      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, (minimalAngle*180/Math.PI) ), false);//-
-		     // }
-		      //else{
-		    	//  leftMotor.rotate(convertAngle(WHEEL_RADIUS, TRACK, minimalAngle), true);
-			   //   rightMotor.rotate(-convertAngle(WHEEL_RADIUS, TRACK, minimalAngle ), false);
-
-		    //  }
-
-		}
-		else if (error < -Math.PI){
-			minimalAngle = error + 2*Math.PI;
-			leftMotor.setSpeed(ROTATE_SPEED);
-		      rightMotor.setSpeed(ROTATE_SPEED);
-
-		      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), true);
-		      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), false);
-		}
-		else if (error > Math.PI){
-			minimalAngle = error - 2*Math.PI;
-			leftMotor.setSpeed(ROTATE_SPEED);
-		      rightMotor.setSpeed(ROTATE_SPEED);
-
-		      leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), true);
-		      rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, Math.toDegrees(minimalAngle)), false);
-		}
+  }
 
 
+  // convert the angle
+  public static int convertAngle(double radius, double width, double angle) {
+    return convertDistance(radius, Math.PI * width * angle / 360.0);
+  }
 
-	}
+  // convert the distance
+  public static int convertDistance(double radius, double distance) {
+    return (int) ((180.0 * distance) / (Math.PI * radius));
+  }
 
-	public boolean isNavigating(){
-		
-
-
-
-		return true;
-	}
-
-
-	  public static int convertDistance(double radius, double distance) {
-		    return (int) ((180.0 * distance) / (Math.PI * radius));
-		  }
-
-		  public static int convertAngle(double radius, double width, double angle) {
-		    return convertDistance(radius, Math.PI * width * angle / 360.0);
-		  }
-
+ 
 }

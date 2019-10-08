@@ -61,9 +61,9 @@ public class Resources {
 
 
 
-//  /**
-//   * The odometer.
-//   */
-//  public static Odometer odometer = Odometer.getOdometer();
+   /**
+   * The odometer.
+   */
+   public static Odometer odometer = Odometer.getOdometer();
 
 }
